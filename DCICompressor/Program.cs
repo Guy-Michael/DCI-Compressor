@@ -10,57 +10,99 @@ namespace DCICompressor
 		static float[] initialScale = { 0, 0.6f, 0.8f, 1 };
 
 
-		static void Main(string[] args)
-		{
-			//word is ABBCA
-			list.Add(new Tuple<String, float>("A", 0.6f));
-			list.Add(new Tuple<String, float>("B", 0.2f));
-			list.Add(new Tuple<String, float>("C", 0.2f));
-			float[] scale = new float[4];
-			scale[0] = 0;
-			scale[1] = 0.6f;
-			scale[2] = 0.8f;
-			scale[3] = 1;
+		//static void Main(string[] args)
+		//{
+		//	//word is ABBCA
+		//	list.Add(new Tuple<String, float>("A", 0.6f));
+		//	list.Add(new Tuple<String, float>("B", 0.2f));
+		//	list.Add(new Tuple<String, float>("C", 0.2f));
+		//	float[] scale = new float[4];
+		//	scale[0] = 0;
+		//	scale[1] = 0.6f;
+		//	scale[2] = 0.8f;
+		//	scale[3] = 1;
 
-			//letter A
-			scale = rescaleArray(scale, 0, 1);
-			//letter B
-			scale = rescaleArray(scale, 1, 2);
+		//	//letter A
+		//	scale = rescaleArray(scale, 0, 1);
+		//	//letter B
+		//	scale = rescaleArray(scale, 1, 2);
 
-			////letter B
-			scale = rescaleArray(scale, 1, 2);
+		//	////letter B
+		//	scale = rescaleArray(scale, 1, 2);
 
-			////letter C
-			scale = rescaleArray(scale, 2, 3);
+		//	////letter C
+		//	scale = rescaleArray(scale, 2, 3);
 
-			////letter A
-			scale = rescaleArray(scale, 0, 1);
-
-
-			//	//Part two.
-			//	float[] scaleForCompression = { scale[0], scale[1] };
-			//	float[] alternatingVal = { 0, 1 };
-			//	string compressedMessage = "";
+		//	////letter A
+		//	scale = rescaleArray(scale, 0, 1);
 
 
-		}
+		//	//	//Part two.
+		//	//	float[] scaleForCompression = { scale[0], scale[1] };
+		//	//	float[] alternatingVal = { 0, 1 };
+		//	//	string compressedMessage = "";
+
+		//	float[] f = { 0.68f, 0.712f };
+		//	Console.WriteLine(encode(f,0,1));
+		//	//Console.WriteLine(encode(scale, 0, 1));
+		//}
 
 
 		public static string encode(float[] array, int minIndex, int maxIndex)
 		{
 			string code = "";
+			float lp = 0, rp = 1, minVal = array[minIndex], maxVal = array[maxIndex];
+			bool inside = false;
 
-			float minVal = array[minIndex], maxVal = array[maxIndex];
-			float lp = 0, rp = 1;
-			while (!(lp>minVal && lp<maxVal && rp>minVal && rp<maxVal))
+
+			for (int i=0; i<15 && !inside; i++)
 			{
+				float midVal = (lp + rp) / 2f;
+				Console.WriteLine("Start");
+				Console.WriteLine($"lp: {lp}\trp: {rp}\tmidVal: {midVal}\nmivVal: {minVal}\tmaxVal: {maxVal}");
 
+				if (lp > minVal && lp < maxVal && rp > minVal && rp < maxVal)
+				{
+					inside = true;
+					Console.WriteLine("Broken!");
+					break;
+				}
+				
+				else if (lp < minVal && midVal > maxVal)
+				{
+					rp = midVal;
+					code += "0";
+				}
+
+				else if (rp > maxVal && midVal < minVal)
+				{
+					lp = midVal;
+					code += "1";
+				}
+
+				//if this section is reached, minVal<mid<maxVal.
+
+				else if (!(lp>minVal && lp<maxVal))
+				{
+					code += "1";
+					lp = midVal;
+				}
+
+				else if (!(rp>minVal && rp<maxVal))
+				{
+					code += "0";
+					rp = midVal;
+				}
+
+				else { inside = true; }
+
+				
+				Console.WriteLine("End");
+				Console.WriteLine($"lp: {lp}\trp: {rp}\tmidVal: {midVal}\nmivVal: {minVal}\tmaxVal: {maxVal}");
+
+				Console.WriteLine("*******************");
+				//Thread.Sleep(1000);
 			}
-
-
-
-
-
 			return code;
 		}
 			public static float[] rescaleArray(float[] array,int minIndex,int maxIndex)
@@ -84,4 +126,7 @@ namespace DCICompressor
 			return rescaledArray;
 		}
 	}
+
+
+
 }
