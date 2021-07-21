@@ -30,8 +30,8 @@ namespace DCICompressor
 
 			frequencies = GenerateFrequencies(input);
 			frequencyScale = GenerateFrequencyScale(frequencies);
-			generateLowerAndUpperBounds(frequencyScale, input, out lowerBound, out upperBound);
-			//code = generateCode(lowerBound, upperBound);
+			GenerateLowerAndUpperBounds(frequencyScale, input, out lowerBound, out upperBound);
+			code = GenerateCode(lowerBound, upperBound);
 
 			return code;
 		}
@@ -100,10 +100,10 @@ namespace DCICompressor
 
 			return frequencyScale;	
 		}
-		private void generateLowerAndUpperBounds(string[] frequencyScale, string input, out float lowerBound, out float upperBound)
+		private void GenerateLowerAndUpperBounds(string[] frequencyScale, string input, out float lowerBound, out float upperBound)
 		{
 			string[] alteredFrequencyScale = frequencyScale;
-			string[] signs = Utils.removeEntriesWithLengthAbove1(frequencyScale);
+			string[] signs = Utils.RemoveEntriesWithLengthAbove1(frequencyScale);
 
 			//These are temporary values just so the file will compile.
 			lowerBound = 0;
@@ -122,14 +122,14 @@ namespace DCICompressor
 				lowerBound = float.Parse(alteredFrequencyScale[signIndex - 1]);
 				upperBound = float.Parse(alteredFrequencyScale[signIndex + 1]);
 
-				alteredFrequencyScale= Utils.normalizeValues(frequencyScale, alteredFrequencyScale, lowerBound, upperBound);
+				alteredFrequencyScale= Utils.NormalizeValues(frequencyScale, alteredFrequencyScale, lowerBound, upperBound);
 			}
 
 
 
 
 		}
-		private string generateCode(float lowerBound, float upperBound)
+		private string GenerateCode(float lowerBound, float upperBound)
 		{
 			return "";
 		}
