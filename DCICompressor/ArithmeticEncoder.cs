@@ -13,30 +13,31 @@ namespace DCICompressor
 		{
 		}
 
+
 		public static void Main(String[] args)
 		{
 			ArithmeticEncoder encoder = new ArithmeticEncoder();
 
-			encoder.Encode("AAABBsertyuiolkjAAAAAhgfdsAAACC");
+			encoder.Encode("AAABC");
 		}
 		public string Encode(string input)
 		{
 			string[] frequencyScale;
-			Dictionary<char, float> frequencies = new Dictionary<char, float>();
+			SortedDictionary<char, float> frequencies = new SortedDictionary<char, float>();
 			float lowerBound, upperBound;
 			
 			string code = "";
 
 			frequencies = GenerateFrequencies(input);
 			frequencyScale = GenerateFrequencyScale(frequencies);
-			//generateLowerAndUpperBounds(input,frequencies, out lowerBound, out upperBound);
+			generateLowerAndUpperBounds(frequencyScale, input, out lowerBound, out upperBound);
 			//code = generateCode(lowerBound, upperBound);
 
 			return code;
 		}
 
 		//Generate a dictionary containing the frequencies of all characters in the string.
-		private Dictionary<char, float> GenerateFrequencies(string input)
+		private SortedDictionary<char, float> GenerateFrequencies(string input)
 		{
 			Dictionary<char, int> quantities = new Dictionary<char, int>();
 			
@@ -61,7 +62,7 @@ namespace DCICompressor
 			//which will be produced from the quantities.
 			//Eventually, all quantities should sum to 1.
 
-			Dictionary<char, float> frequencies = new Dictionary<char, float>();
+			SortedDictionary<char, float> frequencies = new SortedDictionary<char, float>();
 			int numberOfSigns = input.Length;
 
 			foreach(KeyValuePair<char,int> pair in quantities)
@@ -75,7 +76,7 @@ namespace DCICompressor
 		//Generate the frequency scale. The scale an array of strings,
 		//where for every i%2==0, array[i] is a sign,
 		//otherwise, array[i] is a sum of frequencies up to it.
-		private string[] GenerateFrequencyScale(Dictionary<char, float> frequencies)
+		private string[] GenerateFrequencyScale(SortedDictionary<char, float> frequencies)
 		{
 			string[] frequencyScale=new string[frequencies.Count*2 +1];
 
@@ -99,32 +100,34 @@ namespace DCICompressor
 
 			return frequencyScale;	
 		}
-		private void generateLowerAndUpperBounds(string input, Dictionary<char,float> frequencies, out float lowerBound, out float upperBound)
+		private void generateLowerAndUpperBounds(string[] frequencyScale, string input, out float lowerBound, out float upperBound)
 		{
-			char previousKey = frequencies.Keys.First();
+			string[] alteredFrequencyScale = frequencyScale;
+			string[] signs = Utils.removeEntriesWithLengthAbove1(frequencyScale);
 
-		
-			int i = 0;
-			foreach(char key in frequencies.Keys)
-			{
-				if (i == 0)
-				{ }
-				else
-				{
-					frequencies[key] += frequencies[previousKey];
-					previousKey = key;
-				}
-
-				i++;
-			}
-
-			Console.WriteLine("\n\n");
-			foreach(char key in frequencies.Keys)
-			{
-				Console.WriteLine(frequencies[key]);
-			}
+			//These are temporary values just so the file will compile.
 			lowerBound = 0;
 			upperBound = 0;
+
+			for(int i=0; i<input.Length; i++)
+			{
+				string currentSign = input[i].ToString();
+				int signIndex = Utils.BinarySearch<string>(signs, currentSign);
+
+				//modify the sign via the function f(n) -> 2n+1
+				//if index is 0, account for that by adding an additional 1.
+				signIndex = (signIndex * 2) + 1;
+
+				//assign lower and upper bounds.
+				lowerBound = float.Parse(alteredFrequencyScale[signIndex - 1]);
+				upperBound = float.Parse(alteredFrequencyScale[signIndex + 1]);
+
+				alteredFrequencyScale= Utils.normalizeValues(frequencyScale, alteredFrequencyScale, lowerBound, upperBound);
+			}
+
+
+
+
 		}
 		private string generateCode(float lowerBound, float upperBound)
 		{
