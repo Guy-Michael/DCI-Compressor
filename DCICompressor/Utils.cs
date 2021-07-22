@@ -17,6 +17,7 @@ namespace DCICompressor
 
 				if (comparisonResult==0)
 				{
+
 					return midPoint;
 				}
 
