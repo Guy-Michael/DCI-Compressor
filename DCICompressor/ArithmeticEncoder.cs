@@ -19,7 +19,7 @@ namespace DCICompressor
 		{
 			ArithmeticEncoder encoder = new ArithmeticEncoder();
 
-			Console.WriteLine(encoder.Encode("AAYLFLDPGKABC"));
+			Console.WriteLine(encoder.Encode("ABCAA"));
 		}
 		public string Encode(string input)
 		{
@@ -39,10 +39,12 @@ namespace DCICompressor
 			Console.WriteLine("finished generating bounds");
 
 			Console.WriteLine($"upper bound {upperBound}\tlower bound{lowerBound}");
-			code = GenerateCode(lowerBound, upperBound);
+			code = GenerateCode(lowerBound, upperBound );
 			Console.WriteLine("Finished generating code");
 			return code;
 		}
+
+
 
 		//Generate a dictionary containing the frequencies of all characters in the string.
 		private SortedDictionary<char, float> GenerateFrequencies(string input)
@@ -115,7 +117,7 @@ namespace DCICompressor
 
 			//These are temporary values just so the file will compile.
 			lowerBound = 0;
-			upperBound = 0;
+			upperBound = 1;
 
 			for(int i=0; i<input.Length; i++)
 			{
@@ -129,13 +131,43 @@ namespace DCICompressor
 				//assign lower and upper bounds.
 				lowerBound = float.Parse(alteredFrequencyScale[signIndex - 1]);
 				upperBound = float.Parse(alteredFrequencyScale[signIndex + 1]);
-				Console.WriteLine($"upper bound {upperBound}\tlower bound{lowerBound}");
-				Thread.Sleep(1000);
+				//Console.WriteLine($"upper bound {upperBound}\tlower bound {lowerBound}");
+				//Thread.Sleep(500);
 				alteredFrequencyScale = Utils.NormalizeValues(frequencyScale, alteredFrequencyScale, lowerBound, upperBound);
+				
 			}
 
 
 		}
+
+		private string altGenerateCode(float valueToSearch)
+		{
+			string code = string.Empty;
+			float leftPointer = 0, rightPointer = 1;
+			while(leftPointer != valueToSearch && rightPointer != valueToSearch)
+			{
+				float midValue = (leftPointer + rightPointer) / 2f;
+				
+				if (valueToSearch < midValue)
+				{
+					code += "0";
+					rightPointer = midValue;
+				}
+
+				else if (valueToSearch > midValue)
+				{
+					code += "1";
+					leftPointer = midValue;
+				}
+
+				Console.WriteLine($"left pointer: {leftPointer}\tmid value: {midValue}\tright pointer: {rightPointer}");
+				Thread.Sleep(500);
+
+			}
+
+			return code;
+		}
+
 		private string GenerateCode(float lowerBound, float upperBound)
 		{
 
