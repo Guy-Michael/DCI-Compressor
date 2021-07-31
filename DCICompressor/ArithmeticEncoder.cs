@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DCICompressor
@@ -18,7 +19,7 @@ namespace DCICompressor
 		{
 			ArithmeticEncoder encoder = new ArithmeticEncoder();
 
-			encoder.Encode("AAABC");
+			Console.WriteLine(encoder.Encode("ABCAA"));
 		}
 		public string Encode(string input)
 		{
@@ -29,12 +30,21 @@ namespace DCICompressor
 			string code = "";
 
 			frequencies = GenerateFrequencies(input);
+			Console.WriteLine("finished generating frequencies.");
+			
 			frequencyScale = GenerateFrequencyScale(frequencies);
-			generateLowerAndUpperBounds(frequencyScale, input, out lowerBound, out upperBound);
-			//code = generateCode(lowerBound, upperBound);
+			Console.WriteLine("finished generating frequency scale");
+			
+			GenerateLowerAndUpperBounds(frequencyScale, input, out lowerBound, out upperBound);
+			Console.WriteLine("finished generating bounds");
 
+			Console.WriteLine($"upper bound {upperBound}\tlower bound{lowerBound}");
+			code = GenerateCode(lowerBound, upperBound );
+			Console.WriteLine("Finished generating code");
 			return code;
 		}
+
+
 
 		//Generate a dictionary containing the frequencies of all characters in the string.
 		private SortedDictionary<char, float> GenerateFrequencies(string input)
@@ -100,19 +110,19 @@ namespace DCICompressor
 
 			return frequencyScale;	
 		}
-		private void generateLowerAndUpperBounds(string[] frequencyScale, string input, out float lowerBound, out float upperBound)
+		private void GenerateLowerAndUpperBounds(string[] frequencyScale, string input, out float lowerBound, out float upperBound)
 		{
 			string[] alteredFrequencyScale = frequencyScale;
-			string[] signs = Utils.removeEntriesWithLengthAbove1(frequencyScale);
+			string[] signs = Utils.RemoveEntriesWithLengthAbove1(frequencyScale);
 
 			//These are temporary values just so the file will compile.
 			lowerBound = 0;
-			upperBound = 0;
+			upperBound = 1;
 
 			for(int i=0; i<input.Length; i++)
 			{
 				string currentSign = input[i].ToString();
-				int signIndex = Utils.BinarySearch<string>(signs, currentSign);
+				int signIndex = Array.BinarySearch(signs, currentSign);
 
 				//modify the sign via the function f(n) -> 2n+1
 				//if index is 0, account for that by adding an additional 1.
@@ -121,23 +131,95 @@ namespace DCICompressor
 				//assign lower and upper bounds.
 				lowerBound = float.Parse(alteredFrequencyScale[signIndex - 1]);
 				upperBound = float.Parse(alteredFrequencyScale[signIndex + 1]);
-
-				alteredFrequencyScale= Utils.normalizeValues(frequencyScale, alteredFrequencyScale, lowerBound, upperBound);
+				//Console.WriteLine($"upper bound {upperBound}\tlower bound {lowerBound}");
+				//Thread.Sleep(500);
+				alteredFrequencyScale = Utils.NormalizeValues(frequencyScale, alteredFrequencyScale, lowerBound, upperBound);
+				
 			}
 
 
-
-
 		}
-		private string generateCode(float lowerBound, float upperBound)
+
+		private string altGenerateCode(float valueToSearch)
 		{
-			return "";
+			string code = string.Empty;
+			float leftPointer = 0, rightPointer = 1;
+			while(leftPointer != valueToSearch && rightPointer != valueToSearch)
+			{
+				float midValue = (leftPointer + rightPointer) / 2f;
+				
+				if (valueToSearch < midValue)
+				{
+					code += "0";
+					rightPointer = midValue;
+				}
+
+				else if (valueToSearch > midValue)
+				{
+					code += "1";
+					leftPointer = midValue;
+				}
+
+				Console.WriteLine($"left pointer: {leftPointer}\tmid value: {midValue}\tright pointer: {rightPointer}");
+				Thread.Sleep(500);
+
+			}
+
+			return code;
 		}
 
+		private string GenerateCode(float lowerBound, float upperBound)
+		{
 
+			//This is basically a binary search.
 
+			float leftPointer = 0, rightPointer = 1;
+			bool inside = false;
 
+			string code = "";
+			while(!inside)
+			{
+				float midPoint = (leftPointer + rightPointer) / 2f;
 
-		
+				if (leftPointer > lowerBound && leftPointer < upperBound && rightPointer > lowerBound && rightPointer < upperBound)
+				{
+					inside = true;
+					break;
+				}
+
+				else if (leftPointer < lowerBound && midPoint > upperBound)
+				{
+					rightPointer = midPoint;
+					code += "0";
+				}
+
+				else if (rightPointer > upperBound && midPoint < lowerBound)
+				{
+					leftPointer = midPoint;
+					code += "1";
+				}
+
+				//if this section is reached, lowerBound < midPoint < upperBound.
+
+				else if (!(leftPointer > lowerBound && leftPointer < upperBound))
+				{
+					code += "1";
+					leftPointer = midPoint;
+				}
+
+				else if (!(rightPointer > lowerBound && rightPointer < upperBound))
+				{
+					code += "0";
+					rightPointer = midPoint;
+				}
+
+				else { inside = true; }
+
+				//Console.WriteLine($"lp {leftPointer}   rp {rightPointer}   mid {midPoint}   upper {upperBound}   lower {lowerBound}");
+				//Thread.Sleep(500);
+
+			}
+			return code;
+		}	
 	}
 }

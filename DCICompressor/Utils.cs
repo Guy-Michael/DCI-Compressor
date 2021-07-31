@@ -17,6 +17,7 @@ namespace DCICompressor
 
 				if (comparisonResult==0)
 				{
+
 					return midPoint;
 				}
 
@@ -36,7 +37,7 @@ namespace DCICompressor
 		}
 
 
-		public static string[] removeEntriesWithLengthAbove1(string[] array)
+		public static string[] RemoveEntriesWithLengthAbove1(string[] array)
 		{
 			List<String> tempListToStoreEntries = new List<String>();
 
@@ -50,7 +51,7 @@ namespace DCICompressor
 			return tempListToStoreEntries.ToArray();
 		}
 
-		public static float normalizeValue(float valueToScale, float bottomValue, float upperValue, float scaleFactor) 
+		public static float NormalizeValue(float valueToScale, float bottomValue, float upperValue, float scaleFactor) 
 		{
 			float delta = upperValue - bottomValue;
 			float scaledValue = bottomValue + (delta * scaleFactor);
@@ -58,17 +59,17 @@ namespace DCICompressor
 			return scaledValue;
 		}
 
-		public static string[] normalizeValues(string[] originalScale, string[] valuesToScale, float bottomValue, float UpperValue)
+		public static string[] NormalizeValues(string[] originalScale, string[] valuesToScale, float bottomValue, float UpperValue)
 		{
 			string[] scaledValuesArray = new string[valuesToScale.Length];
 
 			scaledValuesArray[0] = bottomValue.ToString();
-			for(int i=1; i<scaledValuesArray.Length; i++)
+			for (int i = 1; i < scaledValuesArray.Length; i++)
 			{
 				float value;
 				if (float.TryParse(valuesToScale[i], out value))
 				{
-					scaledValuesArray[i] = (normalizeValue(value, bottomValue, UpperValue, float.Parse(originalScale[i]))).ToString();
+					scaledValuesArray[i] = (NormalizeValue(value, bottomValue, UpperValue, float.Parse(originalScale[i]))).ToString();
 				}
 
 				else
@@ -78,15 +79,5 @@ namespace DCICompressor
 			}
 			return scaledValuesArray;
 		}
-
-
-
-
-
-
-
-
-
-
 	}
 }

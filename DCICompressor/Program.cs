@@ -51,54 +51,54 @@ namespace DCICompressor
 		public static string encode(float[] array, int minIndex, int maxIndex)
 		{
 			string code = "";
-			float lp = 0, rp = 1, minVal = array[minIndex], maxVal = array[maxIndex];
+			float leftPointer = 0, rightPointer = 1, lowerBound = array[minIndex], upperBound = array[maxIndex];
 			bool inside = false;
 
 
 			for (int i=0; i<15 && !inside; i++)
 			{
-				float midVal = (lp + rp) / 2f;
+				float midPoint = (leftPointer + rightPointer) / 2f;
 				Console.WriteLine("Start");
-				Console.WriteLine($"lp: {lp}\trp: {rp}\tmidVal: {midVal}\nmivVal: {minVal}\tmaxVal: {maxVal}");
+				Console.WriteLine($"lp: {leftPointer}\trp: {rightPointer}\tmidVal: {midPoint}\nmivVal: {lowerBound}\tmaxVal: {upperBound}");
 
-				if (lp > minVal && lp < maxVal && rp > minVal && rp < maxVal)
+				if (leftPointer > lowerBound && leftPointer < upperBound && rightPointer > lowerBound && rightPointer < upperBound)
 				{
 					inside = true;
 					Console.WriteLine("Broken!");
 					break;
 				}
 				
-				else if (lp < minVal && midVal > maxVal)
+				else if (leftPointer < lowerBound && midPoint > upperBound)
 				{
-					rp = midVal;
+					rightPointer = midPoint;
 					code += "0";
 				}
 
-				else if (rp > maxVal && midVal < minVal)
+				else if (rightPointer > upperBound && midPoint < lowerBound)
 				{
-					lp = midVal;
+					leftPointer = midPoint;
 					code += "1";
 				}
 
 				//if this section is reached, minVal<mid<maxVal.
 
-				else if (!(lp>minVal && lp<maxVal))
+				else if (!(leftPointer>lowerBound && leftPointer<upperBound))
 				{
 					code += "1";
-					lp = midVal;
+					leftPointer = midPoint;
 				}
 
-				else if (!(rp>minVal && rp<maxVal))
+				else if (!(rightPointer>lowerBound && rightPointer<upperBound))
 				{
 					code += "0";
-					rp = midVal;
+					rightPointer = midPoint;
 				}
 
 				else { inside = true; }
 
 				
 				Console.WriteLine("End");
-				Console.WriteLine($"lp: {lp}\trp: {rp}\tmidVal: {midVal}\nmivVal: {minVal}\tmaxVal: {maxVal}");
+				Console.WriteLine($"lp: {leftPointer}\trp: {rightPointer}\tmidVal: {midPoint}\nmivVal: {lowerBound}\tmaxVal: {upperBound}");
 
 				Console.WriteLine("*******************");
 				//Thread.Sleep(1000);
