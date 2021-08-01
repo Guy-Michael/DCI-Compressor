@@ -51,25 +51,28 @@ namespace DCICompressor
 			return tempListToStoreEntries.ToArray();
 		}
 
-		public static float NormalizeValue(float valueToScale, float bottomValue, float upperValue, float scaleFactor) 
+		public static ulong NormalizeValue(ulong valueToScale, ulong bottomValue, ulong upperValue, double scaleFactor) 
 		{
-			float delta = upperValue - bottomValue;
-			float scaledValue = bottomValue + (delta * scaleFactor);
 
+			ulong delta = upperValue - bottomValue;
+			//Console.WriteLine($"scale factor: {scaleFactor} " + "delta * scale factor: " + (ulong) (delta * scaleFactor)); 
+			ulong scaledValue = (uint) (bottomValue + ((double)delta * scaleFactor));
+			//Console.WriteLine($"delta: {delta}\tscaleFactor: {scaleFactor}\tscaledValue: {scaledValue}");
 			return scaledValue;
 		}
 
-		public static string[] NormalizeValues(string[] originalScale, string[] valuesToScale, float bottomValue, float UpperValue)
+		public static string[] NormalizeValues(string[] originalScale, string[] valuesToScale, ulong bottomValue, ulong UpperValue)
 		{
 			string[] scaledValuesArray = new string[valuesToScale.Length];
 
 			scaledValuesArray[0] = bottomValue.ToString();
 			for (int i = 1; i < scaledValuesArray.Length; i++)
 			{
-				float value;
-				if (float.TryParse(valuesToScale[i], out value))
+				ulong value;
+				if (ulong.TryParse(valuesToScale[i], out value))
 				{
-					scaledValuesArray[i] = (NormalizeValue(value, bottomValue, UpperValue, float.Parse(originalScale[i]))).ToString();
+					double scaleFactor = (double)((ulong.Parse(originalScale[i]) - ulong.Parse(originalScale[i - 2]))) / uint.MaxValue;
+					scaledValuesArray[i] = (NormalizeValue(value, bottomValue, UpperValue, scaleFactor)).ToString();
 				}
 
 				else

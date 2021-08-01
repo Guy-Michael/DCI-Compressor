@@ -1,0 +1,8 @@
+﻿
+namespace DCICompressor
+{
+	class ArithmeticDecoder
+	{
+		
+	}
+}

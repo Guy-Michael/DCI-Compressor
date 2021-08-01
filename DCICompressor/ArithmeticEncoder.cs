@@ -19,37 +19,34 @@ namespace DCICompressor
 		{
 			ArithmeticEncoder encoder = new ArithmeticEncoder();
 
-			Console.WriteLine(encoder.Encode("ABCAA"));
+			Console.WriteLine(encoder.Encode("ABCBBCCCDAKKKHJGYTHHFJURWSFAACAA"));
 		}
 		public string Encode(string input)
 		{
 			string[] frequencyScale;
-			SortedDictionary<char, float> frequencies = new SortedDictionary<char, float>();
-			float lowerBound, upperBound;
+			SortedDictionary<char, ulong> frequencies = new SortedDictionary<char, ulong>();
+			ulong lowerBound, upperBound;
 			
 			string code = "";
 
-			frequencies = GenerateFrequencies(input);
+			frequencies = GenerateQuantities(input);
 			Console.WriteLine("finished generating frequencies.");
-			
-			frequencyScale = GenerateFrequencyScale(frequencies);
+
+			frequencyScale = scaleQuantitiesBasedOnMaximumCapacity(frequencies);
 			Console.WriteLine("finished generating frequency scale");
 			
 			GenerateLowerAndUpperBounds(frequencyScale, input, out lowerBound, out upperBound);
 			Console.WriteLine("finished generating bounds");
 
-			Console.WriteLine($"upper bound {upperBound}\tlower bound{lowerBound}");
-			code = GenerateCode(lowerBound, upperBound );
+			code = alternativeGenerateCode(lowerBound, upperBound);
 			Console.WriteLine("Finished generating code");
 			return code;
 		}
 
-
-
 		//Generate a dictionary containing the frequencies of all characters in the string.
-		private SortedDictionary<char, float> GenerateFrequencies(string input)
+		private SortedDictionary<char, ulong> GenerateQuantities(string input)
 		{
-			Dictionary<char, int> quantities = new Dictionary<char, int>();
+			SortedDictionary<char, ulong> quantities = new SortedDictionary<char, ulong>();
 			
 
 			//foreach character in the string, check if it is in the dictionary.
@@ -72,21 +69,62 @@ namespace DCICompressor
 			//which will be produced from the quantities.
 			//Eventually, all quantities should sum to 1.
 
-			SortedDictionary<char, float> frequencies = new SortedDictionary<char, float>();
-			int numberOfSigns = input.Length;
+			//SortedDictionary<char, ulong> frequencies = new SortedDictionary<char, ulong>();
+			//int numberOfSigns = input.Length;
 
-			foreach(KeyValuePair<char,int> pair in quantities)
+			//foreach(KeyValuePair<char,int> pair in quantities)
+			//{
+			//	frequencies.Add(pair.Key, ((ulong) pair.Value / (ulong) numberOfSigns));
+			//}
+
+			//foreach (KeyValuePair<char, ulong> pair in quantities)
+			//{
+			//	Console.WriteLine($"key: {pair.Key}\tvalue: {pair.Value}");
+			//}
+
+			return quantities;
+		}
+
+		private string[] scaleQuantitiesBasedOnMaximumCapacity(SortedDictionary<char, ulong> quantities)
+		{
+			string[] quantityScale = new string[(quantities.Count * 2) + 1];
+			ulong maxVal = uint.MaxValue;
+			ulong numberOfItems = (ulong) quantities.Count;
+			ulong totalAmountOfQuantities = 0;
+			foreach(KeyValuePair<char, ulong> pair in quantities)
 			{
-				frequencies.Add(pair.Key, ((float) pair.Value / (float) numberOfSigns));
+				totalAmountOfQuantities += pair.Value;
 			}
 
-			return frequencies;
+			quantityScale[0] = "0";
+			quantityScale[1] = quantities.Keys.ElementAt(0).ToString() ;
+			quantityScale[2] =  ((ulong)(maxVal *  ((double)quantities.Values.ElementAt(0) / totalAmountOfQuantities))).ToString();
+
+			for (int i = 3; i < quantityScale.Length-1; i += 2)
+			{
+				int scaleToFrequencyIndex = (i - 1) / 2;
+				quantityScale[i] = quantities.Keys.ElementAt(scaleToFrequencyIndex).ToString();
+				ulong prevSumOfFrequencies = ulong.Parse(quantityScale[i - 1]);
+				double ratio = (double)quantities.Values.ElementAt(scaleToFrequencyIndex) /(double) totalAmountOfQuantities;
+				ulong newCurrentVal = (ulong)(maxVal * (ratio));
+				quantityScale[i + 1] = (newCurrentVal+ prevSumOfFrequencies).ToString();
+			}
+			quantityScale[quantityScale.Length - 1] = uint.MaxValue.ToString();
+
+			foreach (string val in quantityScale)
+			{
+				Console.WriteLine(val);
+			}
+
+
+
+			return quantityScale;
 		}
 
 		//Generate the frequency scale. The scale an array of strings,
 		//where for every i%2==0, array[i] is a sign,
 		//otherwise, array[i] is a sum of frequencies up to it.
-		private string[] GenerateFrequencyScale(SortedDictionary<char, float> frequencies)
+		private string[] GenerateFrequencyScale(SortedDictionary<char, ulong> frequencies)
 		{
 			string[] frequencyScale=new string[frequencies.Count*2 +1];
 
@@ -103,21 +141,25 @@ namespace DCICompressor
 			{
 				int scaleToFrequencyIndex = (i - 1) / 2;
 				frequencyScale[i] = frequencies.Keys.ElementAt(scaleToFrequencyIndex).ToString();
-				float prevSumOfFrequencies = float.Parse(frequencyScale[i - 1]);
+				ulong prevSumOfFrequencies = ulong.Parse(frequencyScale[i - 1]);
 
 				frequencyScale[i + 1] = (frequencies.Values.ElementAt(scaleToFrequencyIndex) + prevSumOfFrequencies).ToString();
 			}
 
+			foreach(string val in frequencyScale)
+			{
+				Console.WriteLine(val);
+			}
 			return frequencyScale;	
 		}
-		private void GenerateLowerAndUpperBounds(string[] frequencyScale, string input, out float lowerBound, out float upperBound)
+		private void GenerateLowerAndUpperBounds(string[] quantityScale, string input, out ulong lowerBound, out ulong upperBound)
 		{
-			string[] alteredFrequencyScale = frequencyScale;
-			string[] signs = Utils.RemoveEntriesWithLengthAbove1(frequencyScale);
+			string[] alteredFrequencyScale = quantityScale;
+			string[] signs = Utils.RemoveEntriesWithLengthAbove1(quantityScale);
 
 			//These are temporary values just so the file will compile.
 			lowerBound = 0;
-			upperBound = 1;
+			upperBound = ulong.Parse(quantityScale.Last());
 
 			for(int i=0; i<input.Length; i++)
 			{
@@ -128,25 +170,79 @@ namespace DCICompressor
 				//if index is 0, account for that by adding an additional 1.
 				signIndex = (signIndex * 2) + 1;
 
+
+
+				//foreach(string val in quantityScale)
+				//{
+				//	Console.WriteLine(val);
+				//}
+
+
 				//assign lower and upper bounds.
-				lowerBound = float.Parse(alteredFrequencyScale[signIndex - 1]);
-				upperBound = float.Parse(alteredFrequencyScale[signIndex + 1]);
-				//Console.WriteLine($"upper bound {upperBound}\tlower bound {lowerBound}");
+				lowerBound = ulong.Parse(alteredFrequencyScale[signIndex - 1]);
+				upperBound = ulong.Parse(alteredFrequencyScale[signIndex + 1]);
+
+				//Console.WriteLine($"lower: {lowerBound}\tupper: {upperBound}\tdelta:{upperBound - lowerBound}");
 				//Thread.Sleep(500);
-				alteredFrequencyScale = Utils.NormalizeValues(frequencyScale, alteredFrequencyScale, lowerBound, upperBound);
+				alteredFrequencyScale = Utils.NormalizeValues(quantityScale, alteredFrequencyScale, lowerBound, upperBound);
 				
 			}
 
 
 		}
 
-		private string altGenerateCode(float valueToSearch)
+		private string alternativeGenerateCode(ulong lowerBound, ulong upperBound)
 		{
 			string code = string.Empty;
-			float leftPointer = 0, rightPointer = 1;
-			while(leftPointer != valueToSearch && rightPointer != valueToSearch)
+			ulong midValue = 0, leftPointer = 0, rightPointer = uint.MaxValue;
+
+			while (!(leftPointer > lowerBound && leftPointer < upperBound && rightPointer > lowerBound && rightPointer < upperBound))
 			{
-				float midValue = (leftPointer + rightPointer) / 2f;
+				midValue = (leftPointer + rightPointer) / 2;
+
+				//Handle cases where mid is not in between lower and upper bounds.
+				if (midValue < lowerBound)
+				{
+					leftPointer = midValue;
+					code += "1";
+				}
+
+				else if (midValue > upperBound)
+				{
+					rightPointer = midValue;
+					code += "0";
+				}
+
+				//Handle cases where mid is between lower and upper bounds.
+
+				else if (midValue >= lowerBound && midValue <= upperBound)
+				{
+					if (leftPointer < lowerBound)
+					{
+						leftPointer = midValue;
+						code += "1";
+					}
+
+					else if (rightPointer > upperBound)
+					{
+						Console.WriteLine("in here!");
+						rightPointer = midValue;
+						code += "0";
+					}
+				}
+
+				Console.WriteLine($"low: {lowerBound}    left: {leftPointer}    mid: {midValue}     right: {rightPointer}    upper: {upperBound}");
+				Thread.Sleep(500);			
+					}
+			return code;
+		}
+		private string altGenerateCode(ulong valueToSearch) 
+		{
+			string code = string.Empty;
+			ulong leftPointer = 0, rightPointer = uint.MaxValue, midValue = 0;
+			while(leftPointer != valueToSearch && rightPointer != valueToSearch && midValue != valueToSearch)
+			{
+				midValue = (leftPointer + rightPointer) / 2;
 				
 				if (valueToSearch < midValue)
 				{
@@ -160,38 +256,40 @@ namespace DCICompressor
 					leftPointer = midValue;
 				}
 
-				Console.WriteLine($"left pointer: {leftPointer}\tmid value: {midValue}\tright pointer: {rightPointer}");
-				Thread.Sleep(500);
+				Console.WriteLine($"value: {valueToSearch}\tleft pointer: {leftPointer}\tmid value: {midValue}\tright pointer: {rightPointer}");
+				Thread.Sleep(100);
 
 			}
 
 			return code;
 		}
 
-		private string GenerateCode(float lowerBound, float upperBound)
+		private string GenerateCode(ulong lowerBound, ulong upperBound)
 		{
 
 			//This is basically a binary search.
 
-			float leftPointer = 0, rightPointer = 1;
+			ulong leftPointer = 0, rightPointer = uint.MaxValue;
 			bool inside = false;
 
 			string code = "";
 			while(!inside)
 			{
-				float midPoint = (leftPointer + rightPointer) / 2f;
-
+				ulong midPoint = (leftPointer + rightPointer) / 2;
+				
+				//This means the range [leftPointer, rightPointer] is inside [lowerBound, upperBound].
 				if (leftPointer > lowerBound && leftPointer < upperBound && rightPointer > lowerBound && rightPointer < upperBound)
 				{
 					inside = true;
 					break;
 				}
 
-				else if (leftPointer < lowerBound && midPoint > upperBound)
-				{
-					rightPointer = midPoint;
-					code += "0";
-				}
+				//Not sure what this is for.
+				//else if (leftPointer < lowerBound && midPoint > upperBound)
+				//{
+				//	rightPointer = midPoint;
+				//	code += "0";
+				//}
 
 				else if (rightPointer > upperBound && midPoint < lowerBound)
 				{
