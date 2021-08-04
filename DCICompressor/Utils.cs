@@ -36,18 +36,33 @@ namespace DCICompressor
 			return -1;
 		}
 
+		public static int LinearSearch<T>(T[] array, T value) where T : IComparable
+		{
+			for(int i = 0; i< array.Length; i++)
+			{
+				if (array[i].CompareTo(value) == 0)
+					return i;
+			}
+
+			return -1;
+		}
 
 		public static string[] RemoveEntriesWithLengthAbove1(string[] array)
 		{
 			List<String> tempListToStoreEntries = new List<String>();
 
-			foreach (string s in array)
+			for (int i = 1; i < array.Length; i += 2)
 			{
-				if (s.Length == 1 && s[0].CompareTo('9')>0)
 				{
-					tempListToStoreEntries.Add(s);
+					tempListToStoreEntries.Add(array[i]);
 				}
 			}
+
+			foreach (string s in tempListToStoreEntries)
+			{
+				Console.Write(s + ", ");
+			}
+			Console.WriteLine();
 			return tempListToStoreEntries.ToArray();
 		}
 
