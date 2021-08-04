@@ -17,30 +17,39 @@ namespace DCICompressor
 		public static void Main(String[] args)
 		{
 			ArithmeticEncoder encoder = new ArithmeticEncoder();
-			
-			string encode = "ACDVFBGNHK\nHGDFV";
-			string code = encoder.Encode(encode);
+			ArithmeticDecoder decoder = new ArithmeticDecoder();
+
+			string encode = "AAAABBBBCCCC";
+			string code;
+			string[] scale;
+			encoder.Encode(encode, out code, out scale);
+
 			Console.WriteLine(code);
+
+			Console.WriteLine("Starting decoding.");
+			string decoded = decoder.decode(code, scale, encode.Length);
+
+			int HammingDistance = 0;
+			for(int i = 0; i < encode.Length; i++)
+			{
+				if (encode[i] != decoded[i])
+					HammingDistance++;
+			}
+
+			Console.WriteLine("Hamming distance: " + HammingDistance);
 		}
-		public string Encode(string input)
+		public void Encode(string input, out string code, out string[] scale)
 		{
-			string[] quantityScale;
 			SortedDictionary<char, ulong> quantities = new SortedDictionary<char, ulong>();
-			ulong lowerBound, upperBound;
 
 			quantities = GenerateQuantities(input);
 			Console.WriteLine("finished generating quantites.");
 
-			quantityScale = scaleQuantitiesBasedOnMaximumCapacity(quantities);
+			scale = scaleQuantitiesBasedOnMaximumCapacity(quantities);
 			Console.WriteLine("finished generating quantity scale");
-			
-			//GenerateLowerAndUpperBounds(quantityScale, input, out lowerBound, out upperBound);
-			Console.WriteLine("finished generating bounds");
 
-			code = GenerateBoundsAndCodeWithFinitePrecision(quantityScale);
-			//code = GenerateCode(lowerBound, upperBound);
+			code = GenerateBoundsAndCodeWithFinitePrecision(scale);
 			Console.WriteLine("Finished generating code");
-			return code;
 		}
 
 		//Generate a dictionary containing the frequencies of all characters in the string.
@@ -206,7 +215,7 @@ namespace DCICompressor
 		private string GenerateBoundsAndCodeWithFinitePrecision(string[] scale)
 		{
 			string code = string.Empty;
-			ulong leftPointer = 0, rightPointer = ulong.MaxValue;
+			ulong leftPointer = 0, rightPointer = uint.MaxValue;
 
 			const ulong WHOLE = uint.MaxValue;
 			const ulong HALF = WHOLE / 2;
