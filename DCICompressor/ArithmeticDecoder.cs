@@ -9,7 +9,7 @@ namespace DCICompressor
 		{
 		}
 
-		public string decode(string encodedMessage, string[] scale, int decodedMessageLength)
+		public string decode(string encodedMessage, string[] scale, int decodedMessageLength, string original)
 		{
 			/*
 			 * Need to derive Ci, Di, R 
@@ -21,86 +21,108 @@ namespace DCICompressor
 			const ulong HALF = WHOLE / 2;
 			const ulong QUARTER = WHOLE / 4;
 			const ulong PRECISION = 32;
-			ulong a = 0, b = WHOLE, z = 0, i = 0;
-			ulong R = 0;
+			
+			ulong lowerBound = 0, upperBound = WHOLE, approximation = 0, i = 0, R = 0;
 
 			//Deriving R => The sum of all individual quantities.
 			for (int k = 2; k < scale.Length; k += 2)
+				{
+					ulong currentQuantity = ulong.Parse(scale[k]) - ulong.Parse(scale[k - 2]);
+					R += currentQuantity;
+				}
+
+			while (i < PRECISION + 1  && i < (ulong)encodedMessage.Length)
+				{
+					if (encodedMessage[(int)i] == '1')
+					{
+						approximation += (ulong)Math.Pow(2, PRECISION - i  );
+					}
+
+					i += 1;
+				}
+
+				int numberOfSymbolsFound = 0;
+				while (numberOfSymbolsFound < decodedMessageLength)
+				{
+					for (int j = 1; j < scale.Length; j += 2)
+					{
+						ulong delta = upperBound - lowerBound;
+						ulong upperApproximation = lowerBound + (ulong)Math.Round((double)(delta * ulong.Parse(scale[j + 1]) / R));
+						ulong lowerApproximation = lowerBound + (ulong)Math.Round((double)(delta * ulong.Parse(scale[j - 1]) / R));
+						if (lowerApproximation <= approximation && approximation < upperApproximation)
+						{
+							decodedMessage += scale[j];
+							lowerBound = lowerApproximation;
+							upperBound = upperApproximation;
+							numberOfSymbolsFound++;
+							break;
+						}
+					}
+
+					while (upperBound < HALF || lowerBound >= HALF)
+					{
+						if (upperBound < HALF)
+						{
+							lowerBound *= 2;
+							upperBound *= 2;
+							approximation *= 2;
+						}
+
+						else if (lowerBound >= HALF)
+						{
+							lowerBound = 2 * (lowerBound - HALF);
+							upperBound = 2 * (upperBound - HALF);
+							approximation = 2 * (approximation - HALF);
+						}
+
+						if ((int)i < encodedMessage.Length && encodedMessage[encodedMessage.Length - 1 - (int)i] == '1')
+						{
+							approximation += 1;
+						}
+					i += 1;
+					}
+
+					while (lowerBound >= QUARTER && upperBound < 3 * QUARTER)
+					{
+						lowerBound = 2 * (lowerBound - QUARTER);
+						upperBound = 2 * (upperBound - QUARTER);
+						approximation = 2 * (approximation - QUARTER);
+
+						if ((int)i < encodedMessage.Length && encodedMessage[encodedMessage.Length-1 - (int)i] == '1')
+						{
+							approximation += 1;
+
+						}
+					i += 1;
+					}
+
+					//Thread.Sleep(300);
+				}
+			Console.WriteLine($"Length : {original.Length}\tHamming distance: {HammingDistance(original, decodedMessage)}");
+			Console.WriteLine($"original: {original} \t decodedMessage: {decodedMessage}\t ");
+
+			//return decodedMessage;
+			return string.Empty;
+		}
+		public int HammingDistance(string str1, string str2)
+		{
+			int dist = 0;
+			if (str1.Length != str2.Length)
 			{
-				ulong currentQuantity = ulong.Parse(scale[k]) - ulong.Parse(scale[k - 2]);
-				R += currentQuantity;
+				Console.WriteLine("Lengths dont match!");
+				return -1;
 			}
 
-			while (i <= PRECISION && i < (ulong)encodedMessage.Length)
+			for(int i = 0; i< str1.Length; i++)
 			{
-				if (encodedMessage[(int) i] == '1')
-				{
-					Console.WriteLine("Z grew");
-					z += (ulong)Math.Pow(2, PRECISION - i);
-				}
-
-				i += 1;
+				if (str1[i] != str2[i])
+					dist++;
 			}
-
-			bool ended = false;
-			int numberOfSymbolsFound = 0;
-			while (numberOfSymbolsFound < decodedMessageLength)
-			{
-				for (int j = 1; j < scale.Length; j += 2)
-				{
-					ulong w = b - a;
-					ulong b0 = a + (ulong)Math.Round((double) w * ulong.Parse(scale[j + 1]) / R);
-					ulong a0 = a + (ulong)Math.Round((double) w * ulong.Parse(scale[j - 1]) / R);
-
-					if (a0 <= z && z < b0)
-					{
-						Console.WriteLine("Found a symbol!");
-						decodedMessage += scale[j];
-						a = a0;
-						b = b0;
-						numberOfSymbolsFound++;
-
-					}
-				}
-
-				while (b < HALF || a > HALF)
-				{
-					if (b < HALF)
-					{
-						a *= 2;
-						b *= 2;
-						z *= 2;
-					}
-
-					else if (a > HALF)
-					{
-						a = 2 * (a - HALF);
-						b = 2 * (b - HALF);
-						z = 2 * (z - HALF);
-					}
-
-					if ((int) i < encodedMessage.Length && encodedMessage[(int) i] == '1')
-					{
-						z += 1;
-					}
-				}
-
-				while (a > QUARTER && b < 3 * QUARTER)
-				{
-					a = 2 * (a - QUARTER);
-					b = 2 * (b - QUARTER);
-					z = 2 * (z - QUARTER);
-
-					if ((int)i < encodedMessage.Length && encodedMessage[(int) i] == '1')
-					{
-						z += 1;
-						i += 1;
-					}
-				}
-				Console.WriteLine(decodedMessage);
-				//Thread.Sleep(300);
-			}
-			return decodedMessage;
+			return dist;
+			//return (int) Math.Abs((double) ulong.Parse(str1) - ulong.Parse(str2));
 		}
 	}
+
+
+
 }
