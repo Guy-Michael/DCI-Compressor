@@ -66,7 +66,7 @@ namespace DCICompressor
 			return tempListToStoreEntries.ToArray();
 		}
 
-		public static ulong NormalizeValue(ulong valueToScale, ulong bottomValue, ulong upperValue, double scaleFactor) 
+		public static ulong NormalizeULongValue(ulong valueToScale, ulong bottomValue, ulong upperValue, double scaleFactor) 
 		{
 
 			ulong delta = upperValue - bottomValue;
@@ -76,7 +76,39 @@ namespace DCICompressor
 			return scaledValue;
 		}
 
-		public static string[] NormalizeValues(string[] originalScale, string[] valuesToScale, ulong bottomValue, ulong UpperValue)
+		public static double NormalizeDoubleValue(ulong valueToScale, double bottomValue, double upperValue, double scaleFactor)
+		{
+
+			double delta = upperValue - bottomValue;
+			//Console.WriteLine($"scale factor: {scaleFactor} " + "delta * scale factor: " + (ulong) (delta * scaleFactor)); 
+			double scaledValue = (uint)(bottomValue + ((double)delta * scaleFactor));
+			//Console.WriteLine($"delta: {delta}\tscaleFactor: {scaleFactor}\tscaledValue: {scaledValue}");
+			return scaledValue;
+		}
+
+		public static string[] NormalizeDoubleValues(string[] originalScale, string[] valuesToScale, double bottomValue, double UpperValue)
+		{
+			string[] scaledValuesArray = new string[valuesToScale.Length];
+
+			scaledValuesArray[0] = bottomValue.ToString();
+			for (int i = 1; i < scaledValuesArray.Length; i++)
+			{
+				ulong value;
+				if (ulong.TryParse(valuesToScale[i], out value))
+				{
+					double scaleFactor = double.Parse(originalScale[i]) - double.Parse(originalScale[i - 2]);
+					scaledValuesArray[i] = (NormalizeDoubleValue(value, bottomValue, UpperValue, scaleFactor)).ToString();
+				}
+
+				else
+				{
+					scaledValuesArray[i] = valuesToScale[i];
+				}
+			}
+			return scaledValuesArray;
+		}
+
+		public static string[] NormalizeULongValues(string[] originalScale, string[] valuesToScale, ulong bottomValue, ulong UpperValue)
 		{
 			string[] scaledValuesArray = new string[valuesToScale.Length];
 
@@ -87,7 +119,7 @@ namespace DCICompressor
 				if (ulong.TryParse(valuesToScale[i], out value))
 				{
 					double scaleFactor = (double)((ulong.Parse(originalScale[i]) - ulong.Parse(originalScale[i - 2]))) / uint.MaxValue;
-					scaledValuesArray[i] = (NormalizeValue(value, bottomValue, UpperValue, scaleFactor)).ToString();
+					scaledValuesArray[i] = (NormalizeULongValue(value, bottomValue, UpperValue, scaleFactor)).ToString();
 				}
 
 				else

@@ -14,29 +14,11 @@ namespace DCICompressor
 		{
 		}
 
-		public static void Main(String[] args)
-		{
-			ArithmeticEncoder encoder = new ArithmeticEncoder();
-			ArithmeticDecoder decoder = new ArithmeticDecoder();
-			string[] messages = { "ABCD" };
-			for(int i=0; i<messages.Length; i++)
-			{
-				string encode = messages[i];
-				string code;
-				string[] scale;
-				encoder.Encode(encode, out code, out scale);
-
-				Console.WriteLine(code);
-
-				Console.WriteLine("Starting decoding.");
-				string decoded = decoder.decode(code, scale, encode.Length, encode);
-			}
-		}
 		public void Encode(string input, out string code, out string[] scale)
 		{
 			SortedDictionary<char, ulong> quantities = new SortedDictionary<char, ulong>();
 			quantities = GenerateQuantities(input);
-			scale = scaleQuantitiesBasedOnMaximumCapacity(quantities);
+			scale = createQuantityScaleWithoutScaling(quantities);
 			code = GenerateBoundsAndCodeWithFinitePrecision(scale);
 			
 		}
@@ -111,6 +93,7 @@ namespace DCICompressor
 			string code = string.Empty;
 			ulong lowerBound = 0, upperBound = uint.MaxValue;
 
+			//REPLACED WITH CONSTANTS CLASS!
 			//const ulong Constants.WHOLE = uint.MaxValue;
 			//const ulong Constants.HALF = Constants.WHOLE / 2;
 			//const ulong Constants.QUARTER = Constants.WHOLE / 4;
@@ -139,18 +122,17 @@ namespace DCICompressor
 
 				//upperBound = lowerBound + (ulong)Math.Round((double)w * ulong.Parse(scale[i + 1]) / cumlativeQuantity);
 				ulong scaledCurrentUpperBound = delta * currentUpperBound;
-				ulong upperBoundRatio = (ulong)Math.Round((double)(scaledCurrentUpperBound / cumlativeQuantity));
-				upperBound = lowerBound + upperBoundRatio;
+				double upperBoundRatio = ((double)scaledCurrentUpperBound / cumlativeQuantity);
+				ulong roundedUpperRatio = (ulong)Math.Round(upperBoundRatio); 
+				upperBound = lowerBound + roundedUpperRatio;
 
 				//lowerBound = lowerBound + (ulong)Math.Round((double)w * ulong.Parse(scale[i - 1]) / cumlativeQuantity);
 				ulong scaledCurrentLowerBound = delta * currentLowerBound;
-				ulong lowerBoundRatio = (ulong)Math.Round((double)(scaledCurrentLowerBound / cumlativeQuantity));
-				lowerBound += lowerBoundRatio;
+				double lowerBoundRatio = ((double)scaledCurrentLowerBound / cumlativeQuantity);
+				ulong roundedLowerRatio = (ulong)Math.Round(lowerBoundRatio);
+				lowerBound = lowerBound + roundedLowerRatio;
 
-
-
-
-				while ( upperBound < Constants.HALF || lowerBound >= Constants.HALF)
+				while ( upperBound < Constants.HALF || lowerBound > Constants.HALF)
 				{
 					if ( upperBound < Constants.HALF)
 					{
@@ -160,7 +142,7 @@ namespace DCICompressor
 						upperBound *= 2;
 					}
 
-					else if ( lowerBound >= Constants.HALF)
+					else if ( lowerBound > Constants.HALF)
 					{
 						code += "1" + new string('0', s);
 						s = 0;
@@ -179,7 +161,7 @@ namespace DCICompressor
 
 			}
 			s += 1;
-			if (lowerBound <= Constants.QUARTER)
+			if (lowerBound < Constants.QUARTER)
 			{
 				code += "0" + new string('1', s);
 			}
