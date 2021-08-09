@@ -17,30 +17,28 @@ namespace DCICompressor
 		public static void Main(String[] args)
 		{
 			ArithmeticEncoder encoder = new ArithmeticEncoder();
-			
-			string encode = "ACDVFBGNHK\nHGDFV";
-			string code = encoder.Encode(encode);
-			Console.WriteLine(code);
+			ArithmeticDecoder decoder = new ArithmeticDecoder();
+			string[] messages = { "ABCD" };
+			for(int i=0; i<messages.Length; i++)
+			{
+				string encode = messages[i];
+				string code;
+				string[] scale;
+				encoder.Encode(encode, out code, out scale);
+
+				Console.WriteLine(code);
+
+				Console.WriteLine("Starting decoding.");
+				string decoded = decoder.decode(code, scale, encode.Length, encode);
+			}
 		}
-		public string Encode(string input)
+		public void Encode(string input, out string code, out string[] scale)
 		{
-			string[] quantityScale;
 			SortedDictionary<char, ulong> quantities = new SortedDictionary<char, ulong>();
-			ulong lowerBound, upperBound;
-
 			quantities = GenerateQuantities(input);
-			Console.WriteLine("finished generating quantites.");
-
-			quantityScale = scaleQuantitiesBasedOnMaximumCapacity(quantities);
-			Console.WriteLine("finished generating quantity scale");
+			scale = scaleQuantitiesBasedOnMaximumCapacity(quantities);
+			code = GenerateBoundsAndCodeWithFinitePrecision(scale);
 			
-			//GenerateLowerAndUpperBounds(quantityScale, input, out lowerBound, out upperBound);
-			Console.WriteLine("finished generating bounds");
-
-			code = GenerateBoundsAndCodeWithFinitePrecision(quantityScale);
-			//code = GenerateCode(lowerBound, upperBound);
-			Console.WriteLine("Finished generating code");
-			return code;
 		}
 
 		//Generate a dictionary containing the frequencies of all characters in the string.
@@ -48,9 +46,8 @@ namespace DCICompressor
 		{
 			SortedDictionary<char, ulong> quantities = new SortedDictionary<char, ulong>();
 			
-
 			//foreach character in the string, check if it is in the dictionary.
-			//if it is, increment its' quantity.
+			//if it is, increment its quantity.
 			//if it is not, add it to the dictionary with a quantity of 1.
 			foreach(char ch in input)
 			{
@@ -64,32 +61,19 @@ namespace DCICompressor
 					quantities.Add(ch, 1);
 				}
 			}
-
-			//Create a new dictionary to store the frequencies,
-			//which will be produced from the quantities.
-			//Eventually, all quantities should sum to 1.
-
-			//SortedDictionary<char, ulong> frequencies = new SortedDictionary<char, ulong>();
-			//int numberOfSigns = input.Length;
-
-			//foreach(KeyValuePair<char,int> pair in quantities)
-			//{
-			//	frequencies.Add(pair.Key, ((ulong) pair.Value / (ulong) numberOfSigns));
-			//}
-
-			//foreach (KeyValuePair<char, ulong> pair in quantities)
-			//{
-			//	Console.WriteLine($"key: {pair.Key}\tvalue: {pair.Value}");
-			//}
-
+			//quantities.Reverse();
 			return quantities;
 		}
+	
+
+		//********************METHODS FOR FINITE PRECISION IMPLEMENTATION************************//
 		private string[] scaleQuantitiesBasedOnMaximumCapacity(SortedDictionary<char, ulong> quantities)
 		{
 			string[] quantityScale = new string[(quantities.Count * 2) + 1];
-			ulong maxVal = uint.MaxValue;
-			ulong numberOfItems = (ulong) quantities.Count;
+			const ulong WHOLE = uint.MaxValue;
+			
 			ulong totalAmountOfQuantities = 0;
+			
 			foreach(KeyValuePair<char, ulong> pair in quantities)
 			{
 				totalAmountOfQuantities += pair.Value;
@@ -97,165 +81,97 @@ namespace DCICompressor
 
 			quantityScale[0] = "0";
 			quantityScale[1] = quantities.Keys.ElementAt(0).ToString() ;
-			quantityScale[2] =  ((ulong)(maxVal *  ((double)quantities.Values.ElementAt(0) / totalAmountOfQuantities))).ToString();
+			quantityScale[2] =  ((ulong)(WHOLE *  ((double)quantities.Values.ElementAt(0) / totalAmountOfQuantities))).ToString();
 
 			for (int i = 3; i < quantityScale.Length-1; i += 2)
 			{
-				int scaleToFrequencyIndex = (i - 1) / 2;
-				quantityScale[i] = quantities.Keys.ElementAt(scaleToFrequencyIndex).ToString();
+				int scaleToQuantityIndex = (i - 1) / 2;
+				quantityScale[i] = quantities.Keys.ElementAt(scaleToQuantityIndex).ToString();
 				ulong prevSumOfFrequencies = ulong.Parse(quantityScale[i - 1]);
-				double ratio = (double)quantities.Values.ElementAt(scaleToFrequencyIndex) /(double) totalAmountOfQuantities;
-				ulong newCurrentVal = (ulong)(maxVal * (ratio));
+				double ratio = (double)quantities.Values.ElementAt(scaleToQuantityIndex) /(double) totalAmountOfQuantities;
+				ulong newCurrentVal = (ulong)Math.Round(WHOLE * ratio);
 				quantityScale[i + 1] = (newCurrentVal+ prevSumOfFrequencies).ToString();
 			}
 			quantityScale[quantityScale.Length - 1] = uint.MaxValue.ToString();
-
-			//foreach (string val in quantityScale)
-			//{
-			//	Console.WriteLine(val);
-			//}
-
-
-
 			return quantityScale;
-		}
-		private void GenerateLowerAndUpperBounds(string[] quantityScale, string input, out ulong lowerBound, out ulong upperBound)
-		{
-			string[] alteredFrequencyScale = quantityScale;
-			string[] signs = Utils.RemoveEntriesWithLengthAbove1(quantityScale);
-
-			//These are temporary values just so the file will compile.
-			lowerBound = 0;
-			upperBound = ulong.Parse(quantityScale.Last());
-
-			for(int i=0; i<input.Length; i++)
-			{
-				string currentSign = input[i].ToString();
-				//Console.WriteLine($"Searching for {currentSign} in index {i}:");
-				//for (int j=0; j<signs.Length; j++)
-				//{
-				//	Console.Write($"{signs[j]}, ");
-				//}
-				int signIndex = Utils.LinearSearch<string>(signs, currentSign);
-
-				//modify the sign via the function f(n) -> 2n+1
-				//if index is 0, account for that by adding an additional 1.
-				signIndex = (signIndex * 2) + 1;
-				//assign lower and upper bounds.
-				//Console.WriteLine($"sign - 1 {alteredFrequencyScale[signIndex - 1]}\t sign + 1: {alteredFrequencyScale[signIndex + 1]}");
-				lowerBound = ulong.Parse(alteredFrequencyScale[signIndex - 1]);
-				upperBound = ulong.Parse(alteredFrequencyScale[signIndex + 1]);
-
-				//Console.WriteLine($"lower: {lowerBound}\tupper: {upperBound}\tdelta:{upperBound - lowerBound}");
-				//Thread.Sleep(500);
-				alteredFrequencyScale = Utils.NormalizeValues(quantityScale, alteredFrequencyScale, lowerBound, upperBound);
-				
-			}
-		}
-		private string GenerateCode(ulong lowerBound, ulong upperBound)
-		{
-			string code = string.Empty;
-			ulong midValue = 0, leftPointer = 0, rightPointer = uint.MaxValue;
-
-			while (!(leftPointer > lowerBound && leftPointer < upperBound && rightPointer > lowerBound && rightPointer < upperBound))
-			{
-				midValue = (leftPointer + rightPointer) / 2;
-
-				//Handle cases where mid is not in between lower and upper bounds.
-				if (midValue < lowerBound)
-				{
-					leftPointer = midValue;
-					code += "1";
-				}
-
-				else if (midValue > upperBound)
-				{
-					rightPointer = midValue;
-					code += "0";
-				}
-
-				//Handle cases where mid is between lower and upper bounds.
-
-				else if (midValue >= lowerBound && midValue <= upperBound)
-				{
-					if (leftPointer < lowerBound)
-					{
-						leftPointer = midValue;
-						code += "1";
-					}
-
-					else if (rightPointer > upperBound)
-					{
-						Console.WriteLine("in here!");
-						rightPointer = midValue;
-						code += "0";
-					}
-
-					else if (leftPointer == lowerBound || rightPointer == upperBound || leftPointer == rightPointer)
-					{
-						break;
-					}
-				}
-
-				Console.WriteLine($"low: {lowerBound}    left: {leftPointer}    mid: {midValue}     right: {rightPointer}    upper: {upperBound}");
-				Thread.Sleep(500);			
-					}
-			return code;
 		}
 		
 		private string GenerateBoundsAndCodeWithFinitePrecision(string[] scale)
 		{
 			string code = string.Empty;
-			ulong leftPointer = 0, rightPointer = ulong.MaxValue;
+			ulong lowerBound = 0, upperBound = uint.MaxValue;
 
-			const ulong WHOLE = uint.MaxValue;
+			//const ulong WHOLE = uint.MaxValue;
+			//const ulong HALF = WHOLE / 2;
+			//const ulong QUARTER = WHOLE / 4;
+
+			const ulong WHOLE = uint.MaxValue - 1 ;  //choose largest even number
 			const ulong HALF = WHOLE / 2;
-			const ulong QUARTER = WHOLE / 4;
+			const ulong QUARTER = HALF / 2;
 
-			ulong R = 0;
+			ulong cumlativeQuantity = 0;
 			for (int i = 2; i < scale.Length; i += 2)
 			{
-				ulong currentQuantity = ulong.Parse(scale[i]) - ulong.Parse(scale[i - 2]);
-				R += currentQuantity;
+				ulong currentLowerBound = ulong.Parse(scale[i - 2]);
+				ulong currentUpperBound = ulong.Parse(scale[i]);
+				ulong currentQuantity = currentUpperBound - currentLowerBound;
+				cumlativeQuantity += currentQuantity;
 			}
 
 			int s = 0;
 			for (int i = 1; i < scale.Length; i += 2)
 			{
-				ulong w = rightPointer - leftPointer;
-				rightPointer = leftPointer + (uint)Math.Round((double)w * ulong.Parse(scale[i + 1]) / R);
-				leftPointer = leftPointer + (uint) Math.Round((double)w * ulong.Parse(scale[i - 1]) / R);
+				ulong w = upperBound - lowerBound;
+				upperBound = lowerBound + (ulong)Math.Round((double)w * ulong.Parse(scale[i + 1]) / cumlativeQuantity);
+				lowerBound = lowerBound + (ulong)Math.Round((double)w * ulong.Parse(scale[i - 1]) / cumlativeQuantity);
 
-				while( rightPointer < HALF || leftPointer > HALF)
+				//ulong w = upperBound - lowerBound;
+
+				//ulong currentUpperBound = ulong.Parse(scale[i + 1]);
+				//ulong currentLowerBound = ulong.Parse(scale[i - 1]);
+
+				//ulong scaledCurrentUpperBound = w * currentUpperBound;
+				//ulong upperBoundRatio = (ulong) Math.Round((double)(scaledCurrentUpperBound / cumlativeQuantity));
+				//upperBound = lowerBound + upperBoundRatio;
+
+
+				//ulong scaledCurrentLowerBound = w * currentLowerBound;
+				//ulong lowerBoundRatio = (ulong)Math.Round((double)(scaledCurrentLowerBound / cumlativeQuantity));
+				//lowerBound += lowerBoundRatio;
+
+
+
+
+				while ( upperBound < HALF || lowerBound >= HALF)
 				{
-					if ( rightPointer < HALF)
+					if ( upperBound < HALF)
 					{
 						code += "0" + new string('1', s);
 						s = 0;
-						leftPointer *= 2;
-						rightPointer *= 2;
+						lowerBound *= 2;
+						upperBound *= 2;
 					}
 
-					else if ( leftPointer > HALF)
+					else if ( lowerBound >= HALF)
 					{
 						code += "1" + new string('0', s);
 						s = 0;
-						leftPointer = 2 * (leftPointer - HALF);
-						rightPointer = 2 * (rightPointer - HALF);
+						lowerBound = 2 * (lowerBound - HALF);
+						upperBound = 2 * (upperBound - HALF);
 					}
 				}
 
 
-				while (leftPointer > QUARTER && rightPointer < 3 * QUARTER)
+				while (lowerBound > QUARTER && upperBound < 3 * QUARTER)
 				{
 					s += 1;
-					leftPointer = 2 * (leftPointer - QUARTER);
-					rightPointer = 2 * (rightPointer - QUARTER);
+					lowerBound = 2 * (lowerBound - QUARTER);
+					upperBound = 2 * (upperBound - QUARTER);
 				}
 
 			}
 			s += 1;
-			if (leftPointer <= QUARTER)
+			if (lowerBound <= QUARTER)
 			{
 				code += "0" + new string('1', s);
 			}
@@ -266,5 +182,34 @@ namespace DCICompressor
 			}
 			return code;
 		}
+
+		private string[] createQuantityScaleWithoutScaling(SortedDictionary<char, ulong> quantities)
+		{
+			string[] quantityScale = new string[(quantities.Count * 2) + 1];
+			ulong totalAmountOfQuantities = 0;
+			foreach (KeyValuePair<char, ulong> pair in quantities)
+			{
+				totalAmountOfQuantities += pair.Value;
+			}
+
+			quantityScale[0] = "0";
+			quantityScale[1] = quantities.Keys.ElementAt(0).ToString();
+			quantityScale[2] = quantities.Values.ElementAt(0).ToString();
+
+			for (int i = 3; i < quantityScale.Length; i += 2)
+			{
+				int scaleToQuantityIndex = (i - 1) / 2;
+				quantityScale[i] = quantities.Keys.ElementAt(scaleToQuantityIndex).ToString();
+				ulong prevSumOfFrequencies = ulong.Parse(quantityScale[i - 1]);
+				quantityScale[i + 1] = (quantities[quantityScale[i][0]] + prevSumOfFrequencies).ToString();
+			}
+			//quantityScale[quantityScale.Length - 1] = uint.MaxValue.ToString();
+			return quantityScale;
+		}
+
+
+
+
+
 	}
 }
