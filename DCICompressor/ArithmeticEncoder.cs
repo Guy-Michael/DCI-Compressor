@@ -70,7 +70,7 @@ namespace DCICompressor
 		private string[] scaleQuantitiesBasedOnMaximumCapacity(SortedDictionary<char, ulong> quantities)
 		{
 			string[] quantityScale = new string[(quantities.Count * 2) + 1];
-			const ulong WHOLE = uint.MaxValue;
+			//const ulong Constants.WHOLE = uint.MaxValue;
 			
 			ulong totalAmountOfQuantities = 0;
 			
@@ -80,19 +80,29 @@ namespace DCICompressor
 			}
 
 			quantityScale[0] = "0";
-			quantityScale[1] = quantities.Keys.ElementAt(0).ToString() ;
-			quantityScale[2] =  ((ulong)(WHOLE *  ((double)quantities.Values.ElementAt(0) / totalAmountOfQuantities))).ToString();
+			quantityScale[1] = quantities.Keys.ElementAt(0).ToString();
+
+			//quantityScale[2] = ((ulong)(Constants.WHOLE * ((double)quantities.Values.ElementAt(0) / totalAmountOfQuantities))).ToString();
+			double tempRatio = ((double)quantities.Values.ElementAt(0) / totalAmountOfQuantities);
+			quantityScale[2] = ((ulong)(Constants.WHOLE * tempRatio)).ToString();
+
+
 
 			for (int i = 3; i < quantityScale.Length-1; i += 2)
 			{
 				int scaleToQuantityIndex = (i - 1) / 2;
 				quantityScale[i] = quantities.Keys.ElementAt(scaleToQuantityIndex).ToString();
 				ulong prevSumOfFrequencies = ulong.Parse(quantityScale[i - 1]);
-				double ratio = (double)quantities.Values.ElementAt(scaleToQuantityIndex) /(double) totalAmountOfQuantities;
-				ulong newCurrentVal = (ulong)Math.Round(WHOLE * ratio);
-				quantityScale[i + 1] = (newCurrentVal+ prevSumOfFrequencies).ToString();
+
+				//double ratio = (double)quantities.Values.ElementAt(scaleToQuantityIndex) /(double) totalAmountOfQuantities;
+				ulong currentQuantity = quantities.Values.ElementAt(scaleToQuantityIndex);
+				double ratio = ((double)currentQuantity) / totalAmountOfQuantities;
+
+				ulong newCurrentVal = (ulong) Math.Round(Constants.WHOLE * ratio);
+				quantityScale[i + 1] = (newCurrentVal + prevSumOfFrequencies).ToString();
 			}
-			quantityScale[quantityScale.Length - 1] = uint.MaxValue.ToString();
+
+			quantityScale[quantityScale.Length - 1] = Constants.WHOLE.ToString();
 			return quantityScale;
 		}
 		
@@ -101,19 +111,20 @@ namespace DCICompressor
 			string code = string.Empty;
 			ulong lowerBound = 0, upperBound = uint.MaxValue;
 
-			//const ulong WHOLE = uint.MaxValue;
-			//const ulong HALF = WHOLE / 2;
-			//const ulong QUARTER = WHOLE / 4;
+			//const ulong Constants.WHOLE = uint.MaxValue;
+			//const ulong Constants.HALF = Constants.WHOLE / 2;
+			//const ulong Constants.QUARTER = Constants.WHOLE / 4;
 
-			const ulong WHOLE = uint.MaxValue - 1 ;  //choose largest even number
-			const ulong HALF = WHOLE / 2;
-			const ulong QUARTER = HALF / 2;
+			//const ulong Constants.WHOLE = uint.MaxValue - 1 ;  //choose largest even number
+			//const ulong Constants.HALF = Constants.WHOLE / 2;
+			//const ulong Constants.QUARTER = Constants.HALF / 2;
 
 			ulong cumlativeQuantity = 0;
 			for (int i = 2; i < scale.Length; i += 2)
 			{
 				ulong currentLowerBound = ulong.Parse(scale[i - 2]);
 				ulong currentUpperBound = ulong.Parse(scale[i]);
+
 				ulong currentQuantity = currentUpperBound - currentLowerBound;
 				cumlativeQuantity += currentQuantity;
 			}
@@ -121,30 +132,27 @@ namespace DCICompressor
 			int s = 0;
 			for (int i = 1; i < scale.Length; i += 2)
 			{
-				ulong w = upperBound - lowerBound;
-				upperBound = lowerBound + (ulong)Math.Round((double)w * ulong.Parse(scale[i + 1]) / cumlativeQuantity);
-				lowerBound = lowerBound + (ulong)Math.Round((double)w * ulong.Parse(scale[i - 1]) / cumlativeQuantity);
+				ulong delta = upperBound - lowerBound;
 
-				//ulong w = upperBound - lowerBound;
+				ulong currentUpperBound = ulong.Parse(scale[i + 1]);
+				ulong currentLowerBound = ulong.Parse(scale[i - 1]);
 
-				//ulong currentUpperBound = ulong.Parse(scale[i + 1]);
-				//ulong currentLowerBound = ulong.Parse(scale[i - 1]);
+				//upperBound = lowerBound + (ulong)Math.Round((double)w * ulong.Parse(scale[i + 1]) / cumlativeQuantity);
+				ulong scaledCurrentUpperBound = delta * currentUpperBound;
+				ulong upperBoundRatio = (ulong)Math.Round((double)(scaledCurrentUpperBound / cumlativeQuantity));
+				upperBound = lowerBound + upperBoundRatio;
 
-				//ulong scaledCurrentUpperBound = w * currentUpperBound;
-				//ulong upperBoundRatio = (ulong) Math.Round((double)(scaledCurrentUpperBound / cumlativeQuantity));
-				//upperBound = lowerBound + upperBoundRatio;
-
-
-				//ulong scaledCurrentLowerBound = w * currentLowerBound;
-				//ulong lowerBoundRatio = (ulong)Math.Round((double)(scaledCurrentLowerBound / cumlativeQuantity));
-				//lowerBound += lowerBoundRatio;
+				//lowerBound = lowerBound + (ulong)Math.Round((double)w * ulong.Parse(scale[i - 1]) / cumlativeQuantity);
+				ulong scaledCurrentLowerBound = delta * currentLowerBound;
+				ulong lowerBoundRatio = (ulong)Math.Round((double)(scaledCurrentLowerBound / cumlativeQuantity));
+				lowerBound += lowerBoundRatio;
 
 
 
 
-				while ( upperBound < HALF || lowerBound >= HALF)
+				while ( upperBound < Constants.HALF || lowerBound >= Constants.HALF)
 				{
-					if ( upperBound < HALF)
+					if ( upperBound < Constants.HALF)
 					{
 						code += "0" + new string('1', s);
 						s = 0;
@@ -152,26 +160,26 @@ namespace DCICompressor
 						upperBound *= 2;
 					}
 
-					else if ( lowerBound >= HALF)
+					else if ( lowerBound >= Constants.HALF)
 					{
 						code += "1" + new string('0', s);
 						s = 0;
-						lowerBound = 2 * (lowerBound - HALF);
-						upperBound = 2 * (upperBound - HALF);
+						lowerBound = 2 * (lowerBound - Constants.HALF);
+						upperBound = 2 * (upperBound - Constants.HALF);
 					}
 				}
 
 
-				while (lowerBound > QUARTER && upperBound < 3 * QUARTER)
+				while (lowerBound > Constants.QUARTER && upperBound < 3 * Constants.QUARTER)
 				{
 					s += 1;
-					lowerBound = 2 * (lowerBound - QUARTER);
-					upperBound = 2 * (upperBound - QUARTER);
+					lowerBound = 2 * (lowerBound - Constants.QUARTER);
+					upperBound = 2 * (upperBound - Constants.QUARTER);
 				}
 
 			}
 			s += 1;
-			if (lowerBound <= QUARTER)
+			if (lowerBound <= Constants.QUARTER)
 			{
 				code += "0" + new string('1', s);
 			}

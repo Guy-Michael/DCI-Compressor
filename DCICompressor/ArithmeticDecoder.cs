@@ -17,12 +17,12 @@ namespace DCICompressor
 
 			string decodedMessage = string.Empty;
 
-			const ulong WHOLE = uint.MaxValue;
-			const ulong HALF = WHOLE / 2;
-			const ulong QUARTER = WHOLE / 4;
+			//Constants.WHOLE = uint.MaxValue;
+			//const ulong Constants.HALF = Constants.WHOLE / 2;
+			//const ulong Constants.QUARTER = Constants.WHOLE / 4;
 			const ulong PRECISION = 32;
 			
-			ulong lowerBound = 0, upperBound = WHOLE, approximation = 0, i = 0, R = 0;
+			ulong lowerBound = 0, upperBound = Constants.WHOLE, approximation = 0, i = 0, R = 0;
 
 			//Deriving R => The sum of all individual quantities.
 			for (int k = 2; k < scale.Length; k += 2)
@@ -59,20 +59,20 @@ namespace DCICompressor
 						}
 					}
 
-					while (upperBound < HALF || lowerBound >= HALF)
+					while (upperBound < Constants.HALF || lowerBound >= Constants.HALF)
 					{
-						if (upperBound < HALF)
+						if (upperBound < Constants.HALF)
 						{
 							lowerBound *= 2;
 							upperBound *= 2;
 							approximation *= 2;
 						}
 
-						else if (lowerBound >= HALF)
+						else if (lowerBound >= Constants.HALF)
 						{
-							lowerBound = 2 * (lowerBound - HALF);
-							upperBound = 2 * (upperBound - HALF);
-							approximation = 2 * (approximation - HALF);
+							lowerBound = 2 * (lowerBound - Constants.HALF);
+							upperBound = 2 * (upperBound - Constants.HALF);
+							approximation = 2 * (approximation - Constants.HALF);
 						}
 
 						if ((int)i < encodedMessage.Length && encodedMessage[encodedMessage.Length - 1 - (int)i] == '1')
@@ -82,11 +82,11 @@ namespace DCICompressor
 					i += 1;
 					}
 
-					while (lowerBound >= QUARTER && upperBound < 3 * QUARTER)
+					while (lowerBound >= Constants.QUARTER && upperBound < 3 * Constants.QUARTER)
 					{
-						lowerBound = 2 * (lowerBound - QUARTER);
-						upperBound = 2 * (upperBound - QUARTER);
-						approximation = 2 * (approximation - QUARTER);
+						lowerBound = 2 * (lowerBound - Constants.QUARTER);
+						upperBound = 2 * (upperBound - Constants.QUARTER);
+						approximation = 2 * (approximation - Constants.QUARTER);
 
 						if ((int)i < encodedMessage.Length && encodedMessage[encodedMessage.Length-1 - (int)i] == '1')
 						{
