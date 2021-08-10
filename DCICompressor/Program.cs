@@ -8,11 +8,10 @@ namespace DCICompressor
 	{
 		public static void Main(String[] args)
 		{
-			Console.WriteLine(uint.MaxValue-1);
 			//ArithmeticEncoderPreviousImplementation encoder = new ArithmeticEncoderPreviousImplementation();
 			ArithmeticEncoder encoder = new ArithmeticEncoder();
 			ArithmeticDecoder decoder = new ArithmeticDecoder();
-			string messages = "AAABBABDCABDCBABDCABCBACDDBDCABBCCCDDD";
+			string messages = "ABCD";
 
 			string encode = messages;
 			string code;
@@ -22,19 +21,7 @@ namespace DCICompressor
 			Console.WriteLine(code);
 			string decoded = decoder.decode(code, scale, encode.Length, encode);
 			Console.WriteLine(decoded);
-			//ArithmeticEncoder encoder = new ArithmeticEncoder();
-			//ArithmeticDecoder decoder = new ArithmeticDecoder();
-			//string messages ="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD";
 
-			//string encode = messages;
-			//	string code;
-			//	string[] scale;
-			//	encoder.Encode(encode, out code, out scale);
-
-			//	Console.WriteLine(code);
-
-			//	Console.WriteLine("Starting decoding.");
-			//	string decoded = decoder.decode(code, scale, encode.Length, encode);
 		}
 	}
 

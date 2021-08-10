@@ -18,8 +18,8 @@ namespace DCICompressor
 		{
 			SortedDictionary<char, ulong> quantities = new SortedDictionary<char, ulong>();
 			quantities = GenerateQuantities(input);
-			scale = createQuantityScaleWithoutScaling(quantities);
-			code = GenerateBoundsAndCodeWithFinitePrecision(scale);
+			scale = scaleQuantitiesBasedOnMaximumCapacity(quantities);
+			code = GenerateBoundsAndCodeWithFinitePrecision(scale, input);
 			
 		}
 
@@ -52,7 +52,6 @@ namespace DCICompressor
 		private string[] scaleQuantitiesBasedOnMaximumCapacity(SortedDictionary<char, ulong> quantities)
 		{
 			string[] quantityScale = new string[(quantities.Count * 2) + 1];
-			//const ulong Constants.WHOLE = uint.MaxValue;
 			
 			ulong totalAmountOfQuantities = 0;
 			
@@ -88,7 +87,7 @@ namespace DCICompressor
 			return quantityScale;
 		}
 		
-		private string GenerateBoundsAndCodeWithFinitePrecision(string[] scale)
+		private string GenerateBoundsAndCodeWithFinitePrecision(string[] scale, string input)
 		{
 			string code = string.Empty;
 			ulong lowerBound = 0, upperBound = uint.MaxValue;
@@ -103,22 +102,31 @@ namespace DCICompressor
 			//const ulong Constants.QUARTER = Constants.HALF / 2;
 
 			ulong cumlativeQuantity = 0;
-			for (int i = 2; i < scale.Length; i += 2)
+			//for (int i = 2; i < scale.Length; i += 2)
+			for(int i = 0; i < input.Length; i++)
 			{
-				ulong currentLowerBound = ulong.Parse(scale[i - 2]);
-				ulong currentUpperBound = ulong.Parse(scale[i]);
+				string currentChar = input[i].ToString();
+				int scaleIndex = Utils.LinearSearch<string>(scale, currentChar);
+				ulong delta = upperBound - lowerBound;
+
+				ulong currentUpperBound = ulong.Parse(scale[scaleIndex + 1]);
+				ulong currentLowerBound = ulong.Parse(scale[scaleIndex - 1]);
 
 				ulong currentQuantity = currentUpperBound - currentLowerBound;
 				cumlativeQuantity += currentQuantity;
 			}
+			//Console.WriteLine(cumlativeQuantity);
 
 			int s = 0;
-			for (int i = 1; i < scale.Length; i += 2)
+			//for (int i = 1; i < scale.Length; i += 2)
+			for (int i = 0; i < input.Length; i++) 
 			{
+				string currentChar = input[i].ToString();
+				int scaleIndex = Utils.LinearSearch<string>(scale, currentChar);
 				ulong delta = upperBound - lowerBound;
 
-				ulong currentUpperBound = ulong.Parse(scale[i + 1]);
-				ulong currentLowerBound = ulong.Parse(scale[i - 1]);
+				ulong currentUpperBound = ulong.Parse(scale[scaleIndex + 1]);
+				ulong currentLowerBound = ulong.Parse(scale[scaleIndex - 1]);
 
 				//upperBound = lowerBound + (ulong)Math.Round((double)w * ulong.Parse(scale[i + 1]) / cumlativeQuantity);
 				ulong scaledCurrentUpperBound = delta * currentUpperBound;
