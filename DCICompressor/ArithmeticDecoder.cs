@@ -11,9 +11,6 @@ namespace DCICompressor
 
 		public string decode(string encodedMessage, string[] scale, int decodedMessageLength, string original)
 		{
-			/*
-			 * Need to derive Ci, Di, R 
-			 */
 
 			string decodedMessage = string.Empty;
 
@@ -22,7 +19,7 @@ namespace DCICompressor
 			//const ulong Constants.QUARTER = Constants.WHOLE / 4;
 			//const ulong PRECISION = 32;
 			
-			ulong lowerBound = 0, upperBound = Constants.WHOLE, approximation = 0, i = 0, R = 0;
+			ulong a = 0, b = Constants.WHOLE, z = 0, i = 0, R = 0;
 
 			//Deriving R => The sum of all individual quantities.
 			for (int k = 2; k < scale.Length; k += 2)
@@ -31,11 +28,12 @@ namespace DCICompressor
 				R += currentQuantity;
 			}
 
-			while (i < Constants.PRECISION + 1  && i < (ulong)encodedMessage.Length)
+			while (i <= Constants.PRECISION && i < (ulong)encodedMessage.Length)
 			{
+				//Console.WriteLine($"is {i} smaller than {encodedMessage.Length}? {i < (ulong) encodedMessage.Length}");
 				if (encodedMessage[(int)i] == '1')
 				{
-					approximation += (ulong)Math.Pow(2, Constants.PRECISION - i  );
+					z += (ulong)Math.Pow(2, Constants.PRECISION - i);
 				}
 
 				i += 1;
@@ -46,52 +44,70 @@ namespace DCICompressor
 			{
 				for (int j = 1; j < scale.Length; j += 2)
 				{
-					ulong delta = upperBound - lowerBound;
-					ulong upperApproximation = lowerBound + (ulong)Math.Round((double)(delta * ulong.Parse(scale[j + 1]) / R));
-					ulong lowerApproximation = lowerBound + (ulong)Math.Round((double)(delta * ulong.Parse(scale[j - 1]) / R));
-					if (lowerApproximation <= approximation && approximation < upperApproximation)
+					ulong delta = b - a;
+					//ulong b0 = a + (ulong)Math.Round((double)(delta * ulong.Parse(scale[j + 1]) / R));
+					//ulong a0 = a + (ulong)Math.Round((double)(delta * ulong.Parse(scale[j - 1]) / R));
+
+					ulong parsedUpperBound = ulong.Parse(scale[j + 1]);
+					ulong parsedLowerBound = ulong.Parse(scale[j - 1]);
+
+					double frequencyOfUpperBound = ((double)parsedUpperBound) / R;
+					double frequencyOfLowerBound = ((double)parsedLowerBound) / R;
+
+					double scaledUpperBound = delta * frequencyOfUpperBound;
+					double scaledLowerBound = delta * frequencyOfLowerBound;
+
+					ulong roundedUpperBound = (ulong)Math.Round(scaledUpperBound);
+					ulong roundedLowerBound = (ulong)Math.Round(scaledLowerBound);
+
+					ulong b0 = a + roundedUpperBound;
+					ulong a0 = a + roundedLowerBound;
+	
+					if (a0 <= z && z < b0)
 					{
+
 						decodedMessage += scale[j];
-						lowerBound = lowerApproximation;
-						upperBound = upperApproximation;
+						a = a0;
+						b = b0;
 						numberOfSymbolsFound++;
+
+
+
 						break;
 					}
 				}
-
-				while (upperBound < Constants.HALF || lowerBound >= Constants.HALF)
+				while (b < Constants.HALF || a > Constants.HALF)
 				{
-					if (upperBound < Constants.HALF)
+					if (b < Constants.HALF)
 					{
-						lowerBound *= 2;
-						upperBound *= 2;
-						approximation *= 2;
+						a *= 2;
+						b *= 2;
+						z *= 2;
 					}
 
-					else if (lowerBound >= Constants.HALF)
+					else if (a >= Constants.HALF)
 					{
-						lowerBound = 2 * (lowerBound - Constants.HALF);
-						upperBound = 2 * (upperBound - Constants.HALF);
-						approximation = 2 * (approximation - Constants.HALF);
+						a = 2 * (a - Constants.HALF);
+						b = 2 * (b - Constants.HALF);
+						z = 2 * (z - Constants.HALF);
 					}
 
 					if ((int)i < encodedMessage.Length && encodedMessage[encodedMessage.Length - 1 - (int)i] == '1')
 					{
-						approximation += 1;
+						z += 1;
 					}
 				i += 1;
 				}
 
-				while (lowerBound >= Constants.QUARTER && upperBound < 3 * Constants.QUARTER)
+				while (a > Constants.QUARTER && b < 3 * Constants.QUARTER)
 				{
-					lowerBound = 2 * (lowerBound - Constants.QUARTER);
-					upperBound = 2 * (upperBound - Constants.QUARTER);
-					approximation = 2 * (approximation - Constants.QUARTER);
+					a = 2 * (a - Constants.QUARTER);
+					b = 2 * (b - Constants.QUARTER);
+					z = 2 * (z - Constants.QUARTER);
 
 					if ((int)i < encodedMessage.Length && encodedMessage[encodedMessage.Length-1 - (int)i] == '1')
 					{
-						approximation += 1;
-
+						z += 1;
 					}
 				i += 1;
 				}
