@@ -11,7 +11,7 @@ namespace DCICompressor
 			//ArithmeticEncoderPreviousImplementation encoder = new ArithmeticEncoderPreviousImplementation();
 			ArithmeticEncoder encoder = new ArithmeticEncoder();
 			ArithmeticDecoder decoder = new ArithmeticDecoder();
-			string messages = "ABCD";
+			string messages = "abc";
 
 			string encode = messages;
 			string code;
