@@ -59,6 +59,7 @@ namespace DCICompressor
 			{
 				totalAmountOfQuantities += pair.Value;
 			}
+			Console.WriteLine(totalAmountOfQuantities);
 
 			quantityScale[0] = "0";
 			quantityScale[1] = quantities.Keys.ElementAt(0).ToString();

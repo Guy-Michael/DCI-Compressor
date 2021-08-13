@@ -11,20 +11,15 @@ namespace DCICompressor
 
 		public string decode(string encodedMessage, string[] scale, int decodedMessageLength, string original)
 		{
-
-			string decodedMessage = string.Empty;
-
-			//Constants.WHOLE = uint.MaxValue;
-			//const ulong Constants.HALF = Constants.WHOLE / 2;
-			//const ulong Constants.QUARTER = Constants.WHOLE / 4;
-			//const ulong PRECISION = 32;
-			
+			string decodedMessage = string.Empty;	
 			ulong a = 0, b = Constants.WHOLE, z = 0, i = 0, R = 0;
 
 			//Deriving R => The sum of all individual quantities.
 			for (int k = 2; k < scale.Length; k += 2)
 			{
-				ulong currentQuantity = ulong.Parse(scale[k]) - ulong.Parse(scale[k - 2]);
+				ulong currentUpperBound = ulong.Parse(scale[k]);
+				ulong currentLowerBound = ulong.Parse(scale[k - 2]);
+				ulong currentQuantity = currentUpperBound - currentLowerBound;
 				R += currentQuantity;
 			}
 
@@ -70,10 +65,7 @@ namespace DCICompressor
 						a = a0;
 						b = b0;
 						numberOfSymbolsFound++;
-
-
-
-						break;
+					
 					}
 				}
 				while (b < Constants.HALF || a > Constants.HALF)
@@ -107,9 +99,10 @@ namespace DCICompressor
 
 					if ((int)i < encodedMessage.Length && encodedMessage[encodedMessage.Length-1 - (int)i] == '1')
 					{
-						z += 1;
+						z += 1;	
+						i += 1;
 					}
-				i += 1;
+			
 				}
 
 				//Thread.Sleep(300);
