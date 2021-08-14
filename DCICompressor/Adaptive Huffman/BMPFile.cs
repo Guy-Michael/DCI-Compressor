@@ -7,8 +7,8 @@ namespace DCICompressor.Adaptive_Huffman
 	class BMPFile
 	{
 		private string m_Path;
+		private byte[] m_HeaderData;
 		private byte[] m_PixelData;
-		private uint m_PixelDataOffset;
 		private uint m_Width;
 		private uint m_Height;
 		private uint m_BytesPerColor;
@@ -18,16 +18,15 @@ namespace DCICompressor.Adaptive_Huffman
 			get { return m_Path; }
 		}
 
+		public byte[] HeaderData
+		{
+			get { return m_HeaderData; }
+			set { m_HeaderData = value; }
+		}
 		public byte[] PixelData
 		{
 			get { return m_PixelData; }
 			private set { m_PixelData = value; }
-		}
-
-		public uint PixelDataOffset
-		{
-			get { return m_PixelDataOffset; }
-			private set { m_PixelDataOffset = value; }
 		}
 
 		public uint Width
@@ -55,7 +54,12 @@ namespace DCICompressor.Adaptive_Huffman
 			if (IsThisABMPFile(path))
 			{
 				bytes = File.ReadAllBytes(path);
-				PixelDataOffset = BitConverter.ToUInt32(bytes, 0xa);
+				uint pixelDataOffset = BitConverter.ToUInt32(bytes, 0xa);
+
+				Index pixelOffset = (int)(pixelDataOffset-1);
+				HeaderData = bytes[0..pixelOffset];
+				PixelData = bytes[pixelOffset..];
+
 				Width = BitConverter.ToUInt32(bytes, 0x12);
 				Height = BitConverter.ToUInt32(bytes, 0x16);
 				BytesPerColor = BitConverter.ToUInt16(bytes, 0x1c);

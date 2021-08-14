@@ -10,8 +10,20 @@ namespace DCICompressor
 		public static void Main(String[] args)
 		{
 
-			BMPFile file = new BMPFile("C:\\Users\\Guy\\Desktop\\Compression\\ExampleInputs\\Red_Flowers.bmp");
+			//BMPFile file = new BMPFile("C:\\Users\\Guy\\Desktop\\Compression\\ExampleInputs\\Red_Flowers.bmp");
+			byte[] bytes = { 0b11111111, 0b10010011, 0b10101010 };
+			uint24 val = new uint24(bytes);
+			byte[] rebytes = val.ToByteArray();
+			foreach (byte b in bytes)
+			{
+				Console.Write("\t" + b);
+			}
+			Console.WriteLine();
 
+			foreach (byte b in rebytes)
+			{
+				Console.Write("\t" + b);
+			}
 		}
 	}
 
