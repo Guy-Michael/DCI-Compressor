@@ -25,7 +25,8 @@ namespace DCICompressor.Adaptive_Huffman
 			byte[] bytes = File.ReadAllBytes(pathToFileToEncode);
 			foreach(byte b in bytes)
 			{
-				tree.AddNodeAndOutputCode(b);
+				Console.Write(tree.AddNodeAndOutputCode(b));
+
 			}
 		}
 	}

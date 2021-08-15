@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DCICompressor.Adaptive_Huffman
 {
-	class HuffmanTree<T> where T : IComparable<T>
+	class HuffmanTree<T> where T : IComparable<T>, IConvertible
 	{
 		//This is the maximum number unique symbols.
 		private uint s_Counter = (uint) ((Math.Pow(2, 24) * 2) +1);
@@ -120,7 +120,7 @@ namespace DCICompressor.Adaptive_Huffman
 			}
 		}
 
-		public void AddNodeAndOutputCode(T newSign)
+		public string AddNodeAndOutputCode(T newSign)
 		{
 			HuffNode<T> currentNode = locateNodeBySymbol(newSign);
 			if (currentNode == null)
@@ -195,10 +195,31 @@ namespace DCICompressor.Adaptive_Huffman
 					currentNode = currentNode.Parent;
 					currentNode.Frequency++;
 				}
-			
-			
-			
-			
+			}
+			return outputCodeOf(newSign);
+		}
+
+		private string outputCodeOf(T sign)
+		{
+			string code = string.Empty;
+			return outputCode(Root, sign, code);
+
+			string outputCode(HuffNode<T> node, T sign, string code)
+			{
+				if (node.IsLeaf())
+				{
+					if (node.Value.CompareTo(sign) == 0)
+					{
+						string binary = Convert.ToString(Byte.Parse(sign.ToString()), 2);
+
+						return code + "  " + binary;
+					}
+					return string.Empty;
+				}
+				string left = outputCode(node.LeftChild, sign, code + "0");
+				string right = outputCode(node.RightChild, sign, code + "1");
+
+				return left + right;
 			}
 		}
 		public void FindAndIncrementNodeWithSign(T newSign)
