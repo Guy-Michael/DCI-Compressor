@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DCICompressor.Adaptive_Huffman
 {
-	class HuffNode<T> : IComparable<HuffNode<T>>
+	class HuffNode<T>
 	{
 		private HuffNode<T> m_LeftChild;
 		private HuffNode<T> m_RightChild;
@@ -43,7 +43,7 @@ namespace DCICompressor.Adaptive_Huffman
 			set 
 			{ 
 				m_LeftChild = value;
-				Frequency = LeftChild.Frequency + RightChild.Frequency;
+				reCalcFrequency();
 			}
 		}
 
@@ -53,7 +53,7 @@ namespace DCICompressor.Adaptive_Huffman
 			set
 			{
 				m_RightChild = value;
-				Frequency = LeftChild.Frequency + RightChild.Frequency;
+				reCalcFrequency();
 			}
 		}
 
@@ -81,6 +81,19 @@ namespace DCICompressor.Adaptive_Huffman
 			set { m_Frequency = value; }
 		}
 
+		private void reCalcFrequency()
+		{
+			Frequency = 0;
+			if (LeftChild != null)
+			{
+				Frequency += LeftChild.Frequency;
+			}
+
+			if (RightChild != null)
+			{
+				Frequency += RightChild.Frequency;
+			}
+		}
 		public bool IsLeaf()
 		{
 			return (LeftChild == null && RightChild == null);
@@ -95,6 +108,8 @@ namespace DCICompressor.Adaptive_Huffman
 
 		public bool IsSibling(HuffNode<T> other)
 		{
+			if (other == null)
+				return false;
 			return (Parent.Equals(other.Parent));
 		}
 

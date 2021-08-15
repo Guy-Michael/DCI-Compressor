@@ -120,7 +120,7 @@ namespace DCICompressor.Adaptive_Huffman
 			}
 		}
 
-		public void AddNode(T newSign)
+		public void AddNodeAndOutputCode(T newSign)
 		{
 			HuffNode<T> currentNode = locateNodeBySymbol(newSign);
 			if (currentNode == null)
@@ -130,9 +130,11 @@ namespace DCICompressor.Adaptive_Huffman
 
 				HuffNode<T> newNYT = new HuffNode<T>(); // new left child;
 				newNYT.Identifier = s_Counter--;
+				newNYT.Parent = prevNull;
 
 				HuffNode<T> signNode = new HuffNode<T>(newSign); // new right child.
 				signNode.Identifier = s_Counter--;
+				signNode.Parent = prevNull;
 
 				prevNull.LeftChild = newNYT;
 				prevNull.RightChild = signNode;
@@ -147,6 +149,10 @@ namespace DCICompressor.Adaptive_Huffman
 					do
 					{
 						nextNode = LocateNodeByIdentifier(num + 1);
+						if (nextNode == null)
+						{
+							break;
+						}
 						num++;
 					}
 					while (currentNode.Frequency == nextNode.Frequency + 1);
@@ -185,9 +191,9 @@ namespace DCICompressor.Adaptive_Huffman
 								currentParent.RightChild = targetNode;
 							}
 						}
-						currentNode = currentNode.Parent;
-						currentNode.Frequency++;
 					}
+					currentNode = currentNode.Parent;
+					currentNode.Frequency++;
 				}
 			
 			
@@ -230,42 +236,42 @@ namespace DCICompressor.Adaptive_Huffman
 			node.Frequency++;
 		}
 
-		private void findMaxByFrequency(uint frequency)
-		{
+		//private void findMaxByFrequency(uint frequency)
+		//{
 
 
-			int find(HuffNode<T> nodeToCheck, HuffNode<T> currentMax, uint frequency)
-			{
-				if (nodeToCheck.Frequency == frequency)
-				{
-					if (nodeToCheck.Identifier > currentMax.Identifier)
-					{
-						currentMax = nodeToCheck;
-					}
-				}
+		//	int find(HuffNode<T> nodeToCheck, HuffNode<T> currentMax, uint frequency)
+		//	{
+		//		if (nodeToCheck.Frequency == frequency)
+		//		{
+		//			if (nodeToCheck.Identifier > currentMax.Identifier)
+		//			{
+		//				currentMax = nodeToCheck;
+		//			}
+		//		}
 
-				//if (nodeToCheck.Frequency < frequency)
-				//{
-				//	return null;
-				//}
+		//		//if (nodeToCheck.Frequency < frequency)
+		//		//{
+		//		//	return null;
+		//		//}
 
-				//if (nodeToCheck.Frequency == frequency)
-				//{
-				//	if (nodeToCheck.Identifier > currentMax.Identifier)
-				//	{
-				//		currentMax = nodeToCheck;
-				//	}
-				//}
-				//HuffNode<T> leftMax;
-				//HuffNode<T> rightMax;
+		//		//if (nodeToCheck.Frequency == frequency)
+		//		//{
+		//		//	if (nodeToCheck.Identifier > currentMax.Identifier)
+		//		//	{
+		//		//		currentMax = nodeToCheck;
+		//		//	}
+		//		//}
+		//		//HuffNode<T> leftMax;
+		//		//HuffNode<T> rightMax;
 
-				//if (!nodeToCheck.IsLeaf())
-				//{
-				//	leftMax = find(nodeToCheck.LeftChild, currentMax, frequency);
-				//	rightMax = find(nodeToCheck.RightChild, currentMax, frequency);
-				//}
-			}
-		}
+		//		//if (!nodeToCheck.IsLeaf())
+		//		//{
+		//		//	leftMax = find(nodeToCheck.LeftChild, currentMax, frequency);
+		//		//	rightMax = find(nodeToCheck.RightChild, currentMax, frequency);
+		//		//}
+		//	}
+		//}
 	}
 
 	//private HuffNode<T> findAnomaly(HuffNode<T> node, T valToCompare)
