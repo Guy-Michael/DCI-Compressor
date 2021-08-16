@@ -11,7 +11,9 @@ namespace DCICompressor
 		{
 
 			string path =("C:\\Users\\Guy\\Desktop\\Compression\\ExampleInputs\\text.txt");
-			AdaptiveHuffmanEncoder.EncodeNonBMP(path);
+			string code = AdaptiveHuffmanEncoder.EncodeNonBMP(path);
+
+			string decode = AdaptiveHuffmanDecoder.Decode(code);
 		}
 	}
 

@@ -43,7 +43,7 @@ namespace DCICompressor.Adaptive_Huffman
 			set 
 			{ 
 				m_LeftChild = value;
-				reCalcFrequency();
+				//reCalcFrequency();
 			}
 		}
 
@@ -53,7 +53,7 @@ namespace DCICompressor.Adaptive_Huffman
 			set
 			{
 				m_RightChild = value;
-				reCalcFrequency();
+				//reCalcFrequency();
 			}
 		}
 

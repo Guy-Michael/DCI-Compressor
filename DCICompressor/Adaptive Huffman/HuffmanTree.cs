@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace DCICompressor.Adaptive_Huffman
 {
-	class HuffmanTree<T> where T : IComparable<T>, IConvertible
+	class HuffmanTree<T> where T : IComparable<T>
 	{
 		//This is the maximum number unique symbols.
-		private uint s_Counter = (uint) ((Math.Pow(2, 24) * 2) +1);
+		private uint s_Counter = (uint)((Math.Pow(2, 24) * 2) + 1);
 		private HuffNode<T> m_Root;
 		public HuffNode<T> Root
 		{
@@ -25,45 +25,38 @@ namespace DCICompressor.Adaptive_Huffman
 		{
 			NullNode = new HuffNode<T>();
 			Root = NullNode;
+			Root.Identifier = s_Counter--;
 		}
 
 		public bool Contains(T sign)
 		{
-			if (Root.Value.CompareTo(sign) == 0)
-			{
-				return true;
-			}
+			return locateNodeBySymbol(sign) != null;
+			//if (Root.Value.CompareTo(sign) == 0)
+			//{
+			//	return true;
+			//}
 
-			else
-			{
-				return NodeContains(Root.LeftChild, sign) || NodeContains(Root.RightChild, sign);
-			}
+			//else
+			//{
+			//	return NodeContains(Root.LeftChild, sign) || NodeContains(Root.RightChild, sign);
+			//}
 
-			bool NodeContains(HuffNode<T> node, T sign)
-			{
-				if (node.Value.CompareTo(sign) == 0)
-				{
-					return true;
-				}
+			//bool NodeContains(HuffNode<T> node, T sign)
+			//{
+			//	if (node == null)
+			//	{
+			//		return false;
+			//	}
 
-				else
-				{
-					return NodeContains(node.RightChild, sign) || NodeContains(node.LeftChild, sign);
-				}
-			}
-		}
+			//	if (node.Value.CompareTo(sign) == 0)
+			//	{
+			//		return true;
+			//	}
 
-		private void enforceInvariants(HuffNode<T> node)
-		{
-			//Enforce Sibling invariant
-			if (!node.Equals(node.Parent.RightChild))
-			{
-				if (node.Frequency > node.Parent.RightChild.Frequency)
-				{
-					node.Parent.SwapChildren();
-				}
-			}
-
+			//	{
+			//		return NodeContains(node.RightChild, sign) || NodeContains(node.LeftChild, sign);
+			//	}
+			//}
 		}
 
 		private HuffNode<T> LocateNodeByIdentifier(uint identifier)
@@ -73,13 +66,13 @@ namespace DCICompressor.Adaptive_Huffman
 			return node;
 			HuffNode<T> locate(HuffNode<T> node, uint identifier)
 			{
-				if (node.Identifier == identifier) 
+				if (node.Identifier == identifier)
 				{
 					return node;
 				}
 
 				HuffNode<T> Result = null;
-				
+
 				if (node.RightChild != null)
 				{
 					Result = locate(node.RightChild, identifier);
@@ -120,42 +113,44 @@ namespace DCICompressor.Adaptive_Huffman
 			}
 		}
 
-		public string AddNodeAndOutputCode(T newSign)
+		public void AddNode(T newSign)
 		{
+			string code = string.Empty;
+			Root.Frequency++;
 			HuffNode<T> currentNode = locateNodeBySymbol(newSign);
 			if (currentNode == null)
 			{
 				HuffNode<T> prevNull = NullNode;
-				prevNull.Frequency++;
 
-				HuffNode<T> newNYT = new HuffNode<T>(); // new left child;
-				newNYT.Identifier = s_Counter--;
-				newNYT.Parent = prevNull;
 
 				HuffNode<T> signNode = new HuffNode<T>(newSign); // new right child.
 				signNode.Identifier = s_Counter--;
 				signNode.Parent = prevNull;
 
+				HuffNode<T> newNYT = new HuffNode<T>(); // new left child;
+				newNYT.Identifier = s_Counter--;
+				newNYT.Parent = prevNull;
+
 				prevNull.LeftChild = newNYT;
 				prevNull.RightChild = signNode;
+				
+				NullNode = newNYT;
+				//prevNull.Frequency++;
+
+				//code = outputCodeOf(newSign);
 			}
 
 			else
-			{ 
-				while(currentNode != Root)
+			{
+				currentNode.Frequency++;
+				while (currentNode != Root)
 				{
 					uint num = currentNode.Identifier;
-					HuffNode<T> nextNode;
-					do
+					
+					while(currentNode.Frequency == LocateNodeByIdentifier(num+1).Frequency+1)// && !LocateNodeByIdentifier(num+1).Equals(Root))
 					{
-						nextNode = LocateNodeByIdentifier(num + 1);
-						if (nextNode == null)
-						{
-							break;
-						}
 						num++;
 					}
-					while (currentNode.Frequency == nextNode.Frequency + 1);
 
 					if (num != currentNode.Identifier)
 					{
@@ -176,7 +171,7 @@ namespace DCICompressor.Adaptive_Huffman
 								targetParent.LeftChild = currentNode;
 							}
 
-							else if (targetParent.RightChild.Equals(targetNode))
+							if (targetParent.RightChild.Equals(targetNode))
 							{
 								targetParent.RightChild = currentNode;
 							}
@@ -186,20 +181,22 @@ namespace DCICompressor.Adaptive_Huffman
 								currentParent.LeftChild = targetNode;
 							}
 
-							else if (currentParent.RightChild.Equals(currentNode))
+							if (currentParent.RightChild.Equals(currentNode))
 							{
 								currentParent.RightChild = targetNode;
 							}
 						}
+
+						//code = outputCodeOf(newSign);
 					}
-					currentNode = currentNode.Parent;
 					currentNode.Frequency++;
+
+					currentNode = currentNode.Parent;
 				}
 			}
-			return outputCodeOf(newSign);
+		//	return code;
 		}
-
-		private string outputCodeOf(T sign)
+		public string OutputCode(T sign)
 		{
 			string code = string.Empty;
 			return outputCode(Root, sign, code);
@@ -210,9 +207,23 @@ namespace DCICompressor.Adaptive_Huffman
 				{
 					if (node.Value.CompareTo(sign) == 0)
 					{
-						string binary = Convert.ToString(Byte.Parse(sign.ToString()), 2);
 
-						return code + "  " + binary;
+						string binary = "";
+						if (sign is byte)
+						{
+							binary = Convert.ToString(Byte.Parse(sign.ToString()), 2);
+							if (binary.Length < 8)
+							{
+								binary = new string('0', 8 - (binary.Length)) + binary;
+							}
+						}
+
+						else if (sign is uint24)
+						{
+
+						}
+						//Console.WriteLine($"code is{code}\t binary is {binary}");
+						return code;
 					}
 					return string.Empty;
 				}
@@ -222,6 +233,50 @@ namespace DCICompressor.Adaptive_Huffman
 				return left + right;
 			}
 		}
+
+
+		public string OutputCodeOnFirstApperace(T sign)
+		{
+			string code = string.Empty;
+			return outputCode(Root, sign, code);
+
+			string outputCode(HuffNode<T> node, T sign, string code)
+			{
+				if (node.IsLeaf())
+				{
+					if (node.Value.CompareTo(sign) == 0)
+					{
+
+						string binary = "";
+						if (sign is byte)
+						{
+							binary = Convert.ToString(Byte.Parse(sign.ToString()), 2);
+							if (binary.Length < 8)
+							{
+								binary = new string('0', 8 - (binary.Length)) + binary;
+							}
+						}
+
+						else if (sign is uint24)
+						{
+
+						}
+						//Console.WriteLine($"code is{code}\t binary is {binary}");
+						return code + " " + binary;
+					}
+					return string.Empty;
+				}
+				string left = outputCode(node.LeftChild, sign, code + "0");
+				string right = outputCode(node.RightChild, sign, code + "1");
+
+				return left + right;
+			}
+		}
+
+
+
+
+
 		public void FindAndIncrementNodeWithSign(T newSign)
 		{
 			HuffNode<T> tempNode = Root;
@@ -256,62 +311,5 @@ namespace DCICompressor.Adaptive_Huffman
 		{
 			node.Frequency++;
 		}
-
-		//private void findMaxByFrequency(uint frequency)
-		//{
-
-
-		//	int find(HuffNode<T> nodeToCheck, HuffNode<T> currentMax, uint frequency)
-		//	{
-		//		if (nodeToCheck.Frequency == frequency)
-		//		{
-		//			if (nodeToCheck.Identifier > currentMax.Identifier)
-		//			{
-		//				currentMax = nodeToCheck;
-		//			}
-		//		}
-
-		//		//if (nodeToCheck.Frequency < frequency)
-		//		//{
-		//		//	return null;
-		//		//}
-
-		//		//if (nodeToCheck.Frequency == frequency)
-		//		//{
-		//		//	if (nodeToCheck.Identifier > currentMax.Identifier)
-		//		//	{
-		//		//		currentMax = nodeToCheck;
-		//		//	}
-		//		//}
-		//		//HuffNode<T> leftMax;
-		//		//HuffNode<T> rightMax;
-
-		//		//if (!nodeToCheck.IsLeaf())
-		//		//{
-		//		//	leftMax = find(nodeToCheck.LeftChild, currentMax, frequency);
-		//		//	rightMax = find(nodeToCheck.RightChild, currentMax, frequency);
-		//		//}
-		//	}
-		//}
 	}
-
-	//private HuffNode<T> findAnomaly(HuffNode<T> node, T valToCompare)
-	//{
-	//	if (node.IsLeaf())
-	//	{
-	//		if (node.Frequency.CompareTo(valToCompare) < 0)
-	//		{
-	//			return node;
-	//		}
-	//	}
-
-	//	else
-	//	{
-
-	//	}
-	//}
-
-
-
-
 }
