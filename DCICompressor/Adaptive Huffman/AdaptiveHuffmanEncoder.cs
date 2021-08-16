@@ -19,7 +19,7 @@ namespace DCICompressor.Adaptive_Huffman
 				code += tree.OutputCodeOnFirstApperace(newSign);
 			}
 
-			Console.WriteLine(code);
+			//Console.WriteLine(code);
 			return code;
 		}
 
@@ -27,7 +27,7 @@ namespace DCICompressor.Adaptive_Huffman
 		{
 			HuffmanTree<byte> tree = new HuffmanTree<byte>();
 			byte[] bytes = File.ReadAllBytes(pathToFileToEncode);
-			Console.WriteLine($"number of bytes : {bytes.Length}");
+			//Console.WriteLine($"number of bytes : {bytes.Length}");
 			string code = "";
 			foreach(byte b in bytes)
 			{
@@ -47,7 +47,7 @@ namespace DCICompressor.Adaptive_Huffman
 					code += currentCode;
 				}
 			}
-			Console.WriteLine(code);
+			//Console.WriteLine(code);
 
 			code = code.Replace(" ", "");
 			return code;

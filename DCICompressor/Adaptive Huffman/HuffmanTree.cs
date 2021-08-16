@@ -143,19 +143,20 @@ namespace DCICompressor.Adaptive_Huffman
 			else
 			{
 				currentNode.Frequency++;
+				//incrementParentChain(currentNode);
 				while (currentNode != Root)
 				{
 					uint num = currentNode.Identifier;
-					
-					while(currentNode.Frequency == LocateNodeByIdentifier(num+1).Frequency+1)// && !LocateNodeByIdentifier(num+1).Equals(Root))
+					HuffNode<T> temp = LocateNodeByIdentifier(num+1);
+					while(currentNode.Frequency == temp.Frequency+1 && !temp.Equals(Root))
 					{
 						num++;
+						temp = LocateNodeByIdentifier(num);
 					}
 
 					if (num != currentNode.Identifier)
 					{
-						HuffNode<T> targetNode = LocateNodeByIdentifier(num);
-
+						HuffNode<T> targetNode = temp;
 						if (currentNode.IsSibling(targetNode))
 						{
 							currentNode.Parent.SwapChildrenKeepIDs();
@@ -166,6 +167,9 @@ namespace DCICompressor.Adaptive_Huffman
 							HuffNode<T> targetParent = targetNode.Parent;
 							HuffNode<T> currentParent = currentNode.Parent;
 
+							//Console.WriteLine($"targer parent : {targetParent == null} \t currentParent: {currentParent == null}");
+							//Console.WriteLine($"currentValue { char.Parse(currentNode.Frequency.ToString())}");
+							
 							if (targetParent.LeftChild.Equals(targetNode))
 							{
 								targetParent.LeftChild = currentNode;
@@ -189,13 +193,22 @@ namespace DCICompressor.Adaptive_Huffman
 
 						//code = outputCodeOf(newSign);
 					}
-					currentNode.Frequency++;
+					//currentNode.Frequency++;
 
 					currentNode = currentNode.Parent;
 				}
 			}
-		//	return code;
 		}
+
+		private void incrementParentChain(HuffNode<T> node)
+		{
+			if (node != null && node.Parent != null)
+			{
+				node.Parent.Frequency++;
+				incrementParentChain(node.Parent);
+			}
+		}
+
 		public string OutputCode(T sign)
 		{
 			string code = string.Empty;

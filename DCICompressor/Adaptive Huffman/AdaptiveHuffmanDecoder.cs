@@ -10,7 +10,6 @@ namespace DCICompressor.Adaptive_Huffman
 	{
 		public static string Decode(string code)
 		{
-			Console.WriteLine($"Code is : {code}");
 			string decode = "";
 			int symbolLength = 8;
 			string temp = code;
@@ -46,10 +45,8 @@ namespace DCICompressor.Adaptive_Huffman
 					else
 					{
 						tempCode = Convert.ToString(node.Value, 2);
-						//tempCode = temp[0..8];
-						//temp = temp[8..];
+
 					}
-					Console.WriteLine($"Temp:  { tempCode}\twhats left: {temp} ");
 					byte b = Convert.ToByte(tempCode, 2);
 					tree.AddNode(b);
 
