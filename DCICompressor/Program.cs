@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DCICompressor.Adaptive_Huffman;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -8,26 +9,31 @@ namespace DCICompressor
 	{
 		public static void Main(String[] args)
 		{
-			//ArithmeticEncoderPreviousImplementation encoder = new ArithmeticEncoderPreviousImplementation();
-			ArithmeticEncoder encoder = new ArithmeticEncoder();
-			ArithmeticDecoder decoder = new ArithmeticDecoder();
-			string messages = "abc";
 
-			string encode = messages;
-			string code;
-			string[] scale;
-			encoder.Encode(encode, out code, out scale);
+			string path =("C:\\Users\\Guy\\Desktop\\Compression\\ExampleInputs\\text.txt");
+			string code = AdaptiveHuffmanEncoder.EncodeNonBMP(path);
 
-			Console.WriteLine(code);
-			string decoded = decoder.decode(code, scale, encode.Length, encode);
-			Console.WriteLine(decoded);
-
+			string decode = AdaptiveHuffmanDecoder.Decode(code);
 		}
 	}
 
 
 
 
+
+	//ArithmeticEncoderPreviousImplementation encoder = new ArithmeticEncoderPreviousImplementation();
+	//ArithmeticEncoder encoder = new ArithmeticEncoder();
+	//ArithmeticDecoder decoder = new ArithmeticDecoder();
+	//string messages = "abc";
+
+	//string encode = messages;
+	//string code;
+	//string[] scale;
+	//encoder.Encode(encode, out code, out scale);
+
+	//Console.WriteLine(code);
+	//string decoded = decoder.decode(code, scale, encode.Length, encode);
+	//Console.WriteLine(decoded);
 
 
 	//	public static List<Tuple<String, float>> list = new List<Tuple<String, float>>();
@@ -91,7 +97,7 @@ namespace DCICompressor
 	//				Console.WriteLine("Broken!");
 	//				break;
 	//			}
-				
+
 	//			else if (leftPointer < lowerBound && midPoint > upperBound)
 	//			{
 	//				rightPointer = midPoint;
@@ -120,7 +126,7 @@ namespace DCICompressor
 
 	//			else { inside = true; }
 
-				
+
 	//			Console.WriteLine("End");
 	//			Console.WriteLine($"lp: {leftPointer}\trp: {rightPointer}\tmidVal: {midPoint}\nmivVal: {lowerBound}\tmaxVal: {upperBound}");
 
