@@ -65,14 +65,42 @@ namespace DCICompressor
 
 		public override string ToString()
 		{
-			Console.WriteLine("Been here");
 			//return "hello";
 			return (Convert.ToString(b0, 2) + Convert.ToString(b1, 2) + Convert.ToString(b2, 2));
 		}
 
 		public static string ToBinaryString(uint24 num)
 		{
-			return Convert.ToString(num.uintValue, 2);
+			string value = Convert.ToString(num.uintValue, 2);
+			int padding = 24 - value.Length;
+			return new string('0', padding) + value;
+
+			//return Convert.ToString(num.uintValue, 2);
 		}
+
+		public static uint24 TryParse(string num)
+		{
+			foreach(char c in num)
+			{
+				if (!char.IsDigit(c))
+				{
+					throw new ArgumentException("not a numbe!");
+				}
+			}
+
+			//if (num.Length < 24)
+			//{
+			//	int padding = 24 - (num.Length);
+			//	num = new string('0', padding) + num;
+				
+			//}
+			uint value =(uint)  Convert.ToUInt32(num,2);
+			return new uint24(value);
+		}
+
+		//public static uint24 Parse(string num)
+		//{
+
+		//}
 	}
 }

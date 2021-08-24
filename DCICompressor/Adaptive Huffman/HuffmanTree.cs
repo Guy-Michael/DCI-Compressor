@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DCICompressor.Adaptive_Huffman
+namespace DCICompressor
 {
 	class HuffmanTree<T> where T : IComparable<T>
 	{
@@ -133,8 +133,9 @@ namespace DCICompressor.Adaptive_Huffman
 
 				prevNull.LeftChild = newNYT;
 				prevNull.RightChild = signNode;
-				
+
 				NullNode = newNYT;
+				currentNode = signNode;
 				//prevNull.Frequency++;
 
 				//code = outputCodeOf(newSign);
@@ -143,7 +144,8 @@ namespace DCICompressor.Adaptive_Huffman
 			else
 			{
 				currentNode.Frequency++;
-				//incrementParentChain(currentNode);
+			}
+
 				while (currentNode != Root)
 				{
 					uint num = currentNode.Identifier;
@@ -197,7 +199,7 @@ namespace DCICompressor.Adaptive_Huffman
 
 					currentNode = currentNode.Parent;
 				}
-			}
+
 		}
 
 		private void incrementParentChain(HuffNode<T> node)
@@ -219,22 +221,24 @@ namespace DCICompressor.Adaptive_Huffman
 				if (node.IsLeaf())
 				{
 					if (node.Value.CompareTo(sign) == 0)
-					{
+					{ 
+						//string binary = "";
+						//if (sign is byte)
+						//{
+						//	binary = Convert.ToString(Byte.Parse(sign.ToString()), 2);
+						//	if (binary.Length < 8)
+						//	{
+						//		binary = new string('0', 8 - (binary.Length)) + binary;
+						//	}
+						//}
 
-						string binary = "";
-						if (sign is byte)
-						{
-							binary = Convert.ToString(Byte.Parse(sign.ToString()), 2);
-							if (binary.Length < 8)
-							{
-								binary = new string('0', 8 - (binary.Length)) + binary;
-							}
-						}
+						//else if (sign is uint24)
+						//{
+						//	string temp = sign.ToString();
+						//	uint24 num = uint24.TryParse(temp);
+						//	binary = uint24.ToBinaryString(num);
 
-						else if (sign is uint24)
-						{
-
-						}
+						//}
 						//Console.WriteLine($"code is{code}\t binary is {binary}");
 						return code;
 					}
@@ -246,7 +250,6 @@ namespace DCICompressor.Adaptive_Huffman
 				return left + right;
 			}
 		}
-
 
 		public string OutputCodeOnFirstApperace(T sign)
 		{
@@ -272,7 +275,9 @@ namespace DCICompressor.Adaptive_Huffman
 
 						else if (sign is uint24)
 						{
-
+							string temp = sign.ToString();
+							uint24 num = uint24.TryParse(temp);
+							binary = uint24.ToBinaryString(num);
 						}
 						//Console.WriteLine($"code is{code}\t binary is {binary}");
 						return code + " " + binary;
@@ -285,10 +290,6 @@ namespace DCICompressor.Adaptive_Huffman
 				return left + right;
 			}
 		}
-
-
-
-
 
 		public void FindAndIncrementNodeWithSign(T newSign)
 		{

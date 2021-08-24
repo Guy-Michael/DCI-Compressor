@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DCICompressor.Adaptive_Huffman
+namespace DCICompressor
 {
 	class HuffNode<T>
 	{

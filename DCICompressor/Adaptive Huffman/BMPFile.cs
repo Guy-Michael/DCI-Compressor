@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace DCICompressor.Adaptive_Huffman
+namespace DCICompressor
 {
 	class BMPFile
 	{
@@ -56,7 +56,7 @@ namespace DCICompressor.Adaptive_Huffman
 				bytes = File.ReadAllBytes(path);
 				uint pixelDataOffset = BitConverter.ToUInt32(bytes, 0xa);
 
-				Index pixelOffset = (int)(pixelDataOffset-1);
+				Index pixelOffset = (int)(pixelDataOffset);
 				HeaderData = bytes[0..pixelOffset];
 				PixelData = bytes[pixelOffset..];
 
@@ -71,11 +71,41 @@ namespace DCICompressor.Adaptive_Huffman
 			}
 			
 		}
+		public BMPFile(byte[] data)
+		{
+
+			if (IsThisABMPFile(data))
+			{
+				uint pixelDataOffset = BitConverter.ToUInt32(data, 0xa);
+
+				Index pixelOffset = (int)(pixelDataOffset);
+				HeaderData = data[0..pixelOffset];
+				PixelData = data[pixelOffset..];
+
+				Width = BitConverter.ToUInt32(data, 0x12);
+				Height = BitConverter.ToUInt32(data, 0x16);
+				BytesPerColor = BitConverter.ToUInt16(data, 0x1c);
+			}
+
+			else
+			{
+				Console.WriteLine("Not a BMP FILE!");
+			}
+		}
 
 		private bool IsThisABMPFile(string path)
 		{
-			byte[] authenticationBytes = new byte[2];
-			Array.Copy(File.ReadAllBytes(path), authenticationBytes, 2);
+			byte[] authenticationBytes = File.ReadAllBytes(path)[0..2];
+			char firstChar = (char)authenticationBytes[0];
+			char secondChar = (char)authenticationBytes[1];
+
+			return (firstChar == 'B' && secondChar == 'M');
+
+		}
+
+		private bool IsThisABMPFile(byte[] data)
+		{
+			byte[] authenticationBytes = data[0..2];
 			char firstChar = (char)authenticationBytes[0];
 			char secondChar = (char)authenticationBytes[1];
 
