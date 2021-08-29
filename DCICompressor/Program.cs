@@ -12,27 +12,6 @@ namespace DCICompressor
 	{
 		public static void Main(String[] args)
 		{
-			//Socket communication.
-			//IPHostEntry host = Dns.GetHostEntry("localhost");
-			//IPAddress ipAddress = host.AddressList[0];
-			//IPEndPoint remoteEP = new IPEndPoint(ipAddress, 80);
-
-			//Socket sender = new Socket(ipAddress.AddressFamily,
-			//SocketType.Stream, ProtocolType.Tcp);
-
-			//sender.Connect(remoteEP);
-			//byte[] bytes = { 1, 2, 3 };
-			//sender.Send(bytes);
-
-			//string path = ("C:\\Users\\Guy\\Desktop\\Compression\\ExampleInputs\\");
-			//BinaryWriter writer = new BinaryWriter(File.Create(path + "new testing file.tpa"));
-			//byte b = 0b0;
-
-			//for(int i = 0; i <20000; i++)
-			//{
-			//	writer.Write(b);
-			//}
-			//Console.WriteLine("DONE!");
 
 			string path = ("C:\\Users\\Guy\\Desktop\\Compression\\ExampleInputs\\");
 			string fileName = "entropy";
@@ -45,6 +24,19 @@ namespace DCICompressor
 			byte[] result = AdaptiveHuffmanDecoder.Decode8BitBMPCorrectWithRegardsToHeader(path + fileName + outExtension, path + "New  " + fileName + inExtension);
 
 			Console.WriteLine("Result is : " + result.Length + " long.");
+			//Socket communication.
+			//IPHostEntry host = Dns.GetHostEntry("localhost");
+			//IPAddress ipAddress = host.AddressList[0];
+			//IPEndPoint remoteEP = new IPEndPoint(ipAddress, 80);
+
+			//Socket sender = new Socket(ipAddress.AddressFamily,
+			//SocketType.Stream, ProtocolType.Tcp);
+
+			//sender.Connect(remoteEP);
+			//byte[] bytes = { 1, 2, 3 };
+			//sender.Send(bytes);
+
+
 
 		}
 	}
