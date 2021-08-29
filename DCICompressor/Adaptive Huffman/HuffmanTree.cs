@@ -15,172 +15,86 @@ namespace DCICompressor
 			set { m_Root = value; }
 		}
 
-		//private HuffNode<T> m_NullNode;
-		//private HuffNode<T> NullNode
-		//{
-		//	get { return m_NullNode; }
-		//	set { m_NullNode = value; }
-		//}
-
 		public HuffmanTree()
 		{
-			//	NullNode = new HuffNode<T>();
-			//	Root = NullNode;
 			Root = new HuffNode<T>();
 			Root.IsNYT = true;
 			Root.Identifier = s_Counter--;
 		}
 
-		public bool Contains(T sign)
+		private HuffNode<T> LocateNodeByIdentifier(uint i_Identifier)
 		{
-			return locateNodeBySymbol(sign) != null;
-			//if (Root.Value.CompareTo(sign) == 0)
-			//{
-			//	return true;
-			//}
-
-			//else
-			//{
-			//	return NodeContains(Root.LeftChild, sign) || NodeContains(Root.RightChild, sign);
-			//}
-
-			//bool NodeContains(HuffNode<T> node, T sign)
-			//{
-			//	if (node == null)
-			//	{
-			//		return false;
-			//	}
-
-			//	if (node.Value.CompareTo(sign) == 0)
-			//	{
-			//		return true;
-			//	}
-
-			//	{
-			//		return NodeContains(node.RightChild, sign) || NodeContains(node.LeftChild, sign);
-			//	}
-			//}
-		}
-
-		private HuffNode<T> LocateNodeByIdentifier(uint identifier)
-		{
-			HuffNode<T> node = locate(Root, identifier);
+			HuffNode<T> node = locate(Root, i_Identifier);
 
 			return node;
-			HuffNode<T> locate(HuffNode<T> node, uint identifier)
+			HuffNode<T> locate(HuffNode<T> i_Node, uint i_Identifier)
 			{
-				if (node == null)
+				if (i_Node == null)
 				{
 					return null;
 				}
 
-				if (node.Identifier == identifier)
+				if (i_Node.Identifier == i_Identifier)
 				{
-					return node;
+					return i_Node;
 				}
 
 				HuffNode<T> Result = null;
 
-				if (node.RightChild != null)
+				if (i_Node.RightChild != null)
 				{
-					Result = locate(node.RightChild, identifier);
+					Result = locate(i_Node.RightChild, i_Identifier);
 				}
 
-				if (Result == null && node.LeftChild != null)
+				if (Result == null && i_Node.LeftChild != null)
 				{
-					Result = locate(node.LeftChild, identifier);
+					Result = locate(i_Node.LeftChild, i_Identifier);
 				}
 				return Result;
 			}
 		}
 
-		public HuffNode<T> locateNodeBySymbol(T symbol)
+		public HuffNode<T> locateNodeBySymbol(T i_Symbol)
 		{
-			HuffNode<T> node = locate(Root, symbol);
+			HuffNode<T> node = locate(Root, i_Symbol);
 
 			return node;
-			HuffNode<T> locate(HuffNode<T> node, T symbol)
+			HuffNode<T> locate(HuffNode<T> i_Node, T i_Symbol)
 			{
-				if(node.IsLeaf() && node.Frequency != 0)
+				if(i_Node.IsLeaf() && i_Node.Frequency != 0)
 				{
-					if (node.Value.CompareTo(symbol) == 0)
+					if (i_Node.Value.CompareTo(i_Symbol) == 0)
 					{
-						return node;
+						return i_Node;
 					}
 				}
 				
 
 				HuffNode<T> Result = null;
 
-				if (node.RightChild != null)
+				if (i_Node.RightChild != null)
 				{
-					Result = locate(node.RightChild, symbol);
+					Result = locate(i_Node.RightChild, i_Symbol);
 				}
 
-				if (Result == null && node.LeftChild != null)
+				if (Result == null && i_Node.LeftChild != null)
 				{
-					Result = locate(node.LeftChild, symbol);
+					Result = locate(i_Node.LeftChild, i_Symbol);
 				}
 				return Result;
 			}
 		}
 
-		/*
-		 * Sections:
-		 * 1.Determine if the current value exists in the tree or not.
-		 * 2.Add it accordingly.
-		 * 3.Determine whether the newly added\incremented node violates the sibling invariant:
-		 *	3.1  if the frequency of "current" bigger than the frequency of the next in line?
-		 *	3.2 if so, find the biggest node with the same frequency of the next in line.
-		 *	3.3 swap current node with the biggest in block.
-		 * 4.increment parent of the current node.
-		 * 
-		 * Things to keep in mind:
-		 * 1.Before incrementing the parent, make sure you are incrementing the correct parent.
-		 * 2.Explicitly assign parent and children.
-		 */
-
-		//private string addNewNode(T newSign)
-		//{
-		//	string code = string.Empty;
-		//	HuffNode<T> prevNYT = LocateNodeByIdentifier(s_Counter + 1);
-		//	prevNYT.IsNYT = false;
-		//	HuffNode<T> currentNode = new HuffNode<T>(newSign);
-		//	currentNode.Identifier = s_Counter--;
-
-		//	HuffNode<T> newNYT = new HuffNode<T>();
-		//	newNYT.Identifier = s_Counter--;
-		//	newNYT.IsNYT = true;
-
-		//	prevNYT.RightChild = currentNode;
-		//	prevNYT.LeftChild = newNYT;
-
-		//	prevNYT.RightChild.Parent = prevNYT;
-		//	prevNYT.LeftChild.Parent = prevNYT;
-
-		//	code = OutputCodeOnFirstApperace(newSign);
-
-		//	prevNYT.Frequency++;
-		//	currentNode = currentNode.Parent;
-		//	while (currentNode != Root)
-		//	{
-		//		currentNode = currentNode.Parent;
-		//		HuffNode<T> biggestInBlock = GetHighestIdentifierByFrequency(currentNode.Frequency);
-		//	//	if ()
-
-
-		//	}
-		//}
-		public string AddNodeCorrect(T newSign)
+		public string AddNodeCorrect(T i_NewSign)
 		{
 			string code = string.Empty;
-			HuffNode<T> currentNode = locateNodeBySymbol(newSign);
+			HuffNode<T> currentNode = locateNodeBySymbol(i_NewSign);
 
 			if (currentNode == null)
 			{
 				HuffNode<T> prevNYT = LocateNodeByIdentifier(s_Counter + 1);
 				prevNYT.IsNYT = false;
-				currentNode = new HuffNode<T>(newSign);
+				currentNode = new HuffNode<T>(i_NewSign);
 				currentNode.Identifier = s_Counter--;
 
 				HuffNode<T> newNYT = new HuffNode<T>();
@@ -193,67 +107,39 @@ namespace DCICompressor
 				prevNYT.RightChild.Parent = prevNYT;
 				prevNYT.LeftChild.Parent = prevNYT;
 
-				code = OutputCodeUnified(newSign, true);
-				prevNYT.Frequency++;
+				code = OutputCode(i_NewSign, true);
+				IncrementNode(prevNYT);
 				currentNode = currentNode.Parent;
 			}
 			else
 			{
-				code = OutputCodeUnified(newSign, false);
-				//currentNode.Frequency++;
+				code = OutputCode(i_NewSign, false);
 			}
 
-			//3. Determine if "current" violates the sibling invariant.
-			
 			while(currentNode != Root)
 			{
 				currentNode = currentNode.Parent;
-				HuffNode<T> biggest = GetHighestIdentifierByFrequencyDismissParent(currentNode);
+				HuffNode<T> biggest = GetBiggestIdentifierInBlock(currentNode);
+
 				if (currentNode != biggest && biggest != null)
 				{
 					swapNodes(currentNode, biggest);
-					biggest.Frequency++;
+					IncrementNode(biggest);
 					currentNode = biggest;
 				}
+
 				else
 				{
-					currentNode.Frequency++;
+					IncrementNode(currentNode);
 				}
-
-
-				//HuffNode<T> nextInLine = LocateNodeByIdentifier(currentNode.Identifier + 1);
-				//if (nextInLine == null || nextInLine == Root)
-				//{
-				//}
-
-				//else if (nextInLine.Frequency < currentNode.Frequency && currentNode.Parent != nextInLine)
-				//{
-				//	HuffNode<T> biggest = GetHighestIdentifierByFrequency(nextInLine.Frequency);
-				//	swapNodes(currentNode, biggest);
-
-				//	currentNode.Parent.Frequency++;
-				//	currentNode = currentNode.Parent;
-				//	continue;
-				//}
-
-				//else
-				//{
-				//	currentNode.Parent.Frequency++;
-				//}
-
-
-
-
-
-				//3.1 Finding the biggest node in the current block.
 			}
 			return code;
 		}
 
-		public HuffNode<T> GetHighestIdentifierByFrequencyDismissParent(HuffNode<T> nodeToCheck)
+		public HuffNode<T> GetBiggestIdentifierInBlock(HuffNode<T> i_NodeToCheck)
 		{
 			List<HuffNode<T>> list = new List<HuffNode<T>>();
-			locate(Root, nodeToCheck);
+			locate(Root, i_NodeToCheck);
 
 			if (list.Count == 0)
 			{
@@ -263,7 +149,6 @@ namespace DCICompressor
 			HuffNode<T> max = list[0];
 			foreach (HuffNode<T> node in list)
 			{
-				//Console.WriteLine($"frequency: {node.Frequency}\t id: {node.Identifier}");
 				if (node.Identifier > max.Identifier)
 				{
 					max = node;
@@ -272,150 +157,31 @@ namespace DCICompressor
 
 			return max;
 
-			void locate(HuffNode<T> node, HuffNode<T> nodeToCheck)
+			void locate(HuffNode<T> i_Node, HuffNode<T> i_NodeToCheck)
 			{
-				if (node == null)
+				if (i_Node == null)
 				{
 					return;
 				}
 
-				if (node.Frequency == nodeToCheck.Frequency && nodeToCheck.Parent != node)
+				if (i_Node.Frequency == i_NodeToCheck.Frequency && i_NodeToCheck.Parent != i_Node)
 				{
-					list.Add(node);
+					list.Add(i_Node);
 				}
 
-				if (node.RightChild != null)
+				if (i_Node.RightChild != null)
 				{
-					locate(node.RightChild, nodeToCheck);
+					locate(i_Node.RightChild, i_NodeToCheck);
 				}
 
-				if (node.LeftChild != null)
+				if (i_Node.LeftChild != null)
 				{
-					locate(node.LeftChild, nodeToCheck);
-				}
-			}
-		}
-
-		public HuffNode<T> GetHighestIdentifierByFrequency(int frequency)
-		{
-			List<HuffNode<T>> list = new List<HuffNode<T>>();
-			locate(Root, frequency);
-
-			if (list.Count == 0)
-			{
-				return null;
-			}
-
-			HuffNode<T> max = list[0];
-			foreach(HuffNode<T> node in list)
-			{
-				//Console.WriteLine($"frequency: {node.Frequency}\t id: {node.Identifier}");
-				if (node.Identifier > max.Identifier)
-				{
-					max = node;
-				}
-			}
-
-			return max;
-
-			void locate(HuffNode<T> node, int frequency)
-			{
-				if (node == null)
-				{
-					return;
-				}
-
-				if (node.Frequency == frequency)
-				{
-					 list.Add(node);
-				}
-
-				if (node.RightChild != null)
-				{
-					locate(node.RightChild, frequency);
-				}
-
-				if (node.LeftChild != null)
-				{
-					locate(node.LeftChild, frequency);
+					locate(i_Node.LeftChild, i_NodeToCheck);
 				}
 			}
 		}
-	
-		//public void AddNode(T newSign)
-		//{
-		//	string code = string.Empty;
 
-		//	HuffNode<T> currentNode = locateNodeBySymbol(newSign);
-		//	if (currentNode == null)
-		//	{
-		//		currentNode = new HuffNode<T>(newSign); // This is new right.
-		//		currentNode.Identifier = s_Counter--;
-
-		//		HuffNode<T> newNYT = new HuffNode<T>(); // this is new left.
-		//		newNYT.Identifier = s_Counter--;
-
-		//		NullNode.RightChild = currentNode;
-		//		NullNode.LeftChild = newNYT;
-
-		//		currentNode.Parent = NullNode;
-		//		newNYT.Parent = NullNode;
-
-		//		NullNode = NullNode.LeftChild;
-		//	}
-
-		//	else
-		//	{
-		//		//Console.WriteLine("Incrementing " + newSign);
-		//		//currentNode.Frequency++;
-		//	}
-
-		//	//incrementParentChain(currentNode);
-		//	while (!currentNode.Equals(Root))
-		//	{
-		//		currentNode.Frequency++;
-		//		uint num = currentNode.Identifier;
-		//		HuffNode<T> BiggestInBlockNode = LocateNodeByIdentifier(num+1);
-		//		int currentFrequency = currentNode.Frequency;
-		//		int biggetFrequencyInBlock = BiggestInBlockNode.Frequency;
-		//		while(currentFrequency == BiggestInBlockNode.Frequency + 1 && !Root.Equals(LocateNodeByIdentifier(num+1)))
-		//		{
-		//			num++;
-		//			if (LocateNodeByIdentifier(num) != null)
-		//			{
-		//				BiggestInBlockNode = LocateNodeByIdentifier(num);
-		//				biggetFrequencyInBlock = BiggestInBlockNode.Frequency;
-		//			}
-		//		}
-
-		//		if (num != currentNode.Identifier)
-		//		{
-		//			if (currentNode.IsSibling(BiggestInBlockNode))
-		//			{
-		//				currentNode.Parent.SwapChildrenKeepIDs();
-		//			}
-
-		//			else
-		//			{
-
-		//				swapNodes(currentNode, BiggestInBlockNode);
-		//				//HuffNode<T> BiggestInBlockParent = BiggestInBlockNode.Parent;
-		//				//HuffNode<T> currentParent = currentNode.Parent;
-		//			}
-		//		}
-		//		currentNode.Frequency++;
-
-		//		if (currentNode.Parent.Equals(Root))
-		//		{
-		//			break;
-		//		}
-		//		currentNode = currentNode.Parent;
-		//	}
-		//	Root.Frequency++;
-
-		//}
-
-		public string OutputCodeUnified(T sign, bool i_IsFirstApperance)
+		public string OutputCode(T sign, bool i_IsFirstApperance)
 		{
 			string code = string.Empty;
 			return outputCode(Root, sign, code, i_IsFirstApperance);
@@ -479,140 +245,6 @@ namespace DCICompressor
 			}
 		}
 
-
-		public string OutputCode(T sign)
-		{
-			string code = string.Empty;
-			return outputCode(Root, sign, code);
-
-			string outputCode(HuffNode<T> node, T sign, string code)
-			{
-				if (node == null)
-				{
-					return string.Empty;
-				}
-				if (node.IsLeaf() && !node.IsNYT)
-				{
-					if (node.Value.CompareTo(sign) == 0)
-					{
-						//Console.WriteLine(sign);
-						//string signAsString = sign.ToString();
-						//byte signValue = Byte.Parse(signAsString);
-						//string binary = Convert.ToString(signValue, 2);
-
-						//if (binary.Length < 8)
-						//{
-						//	//binary = new string('0', 8 - (binary.Length)) + binary;
-						//}
-
-						////Console.WriteLine($"Sign is {sign}, sign value is {signValue}");
-						
-						//if (signValue == 0)
-						//{
-						////	Console.WriteLine("Value is : " + signValue);
-						//}
-						//Console.WriteLine(sign);
-						//string binary = "";
-						//if (sign is byte)
-						//{
-						//	binary = Convert.ToString(Byte.Parse(sign.ToString()), 2);
-						//	if (binary.Length < 8)
-						//	{
-						//		binary = new string('0', 8 - (binary.Length)) + binary;
-						//	}
-						//}
-
-						//else if (sign is uint24)
-						//{
-						//	string temp = sign.ToString();
-						//	uint24 num = uint24.TryParse(temp);
-						//	binary = uint24.ToBinaryString(num);
-
-						//}
-						//Console.WriteLine($"code is{code}\t binary is {binary}");
-						return  code;
-					}
-					return string.Empty;
-				}
-				string left = outputCode(node.LeftChild, sign, code + "0");
-				string right = outputCode(node.RightChild, sign, code + "1");
-				return left + right;
-			}
-		}
-
-		public string OutputCodeOnFirstApperace(T sign)
-		{
-			string code = string.Empty;
-			return outputCode(Root, sign, code);
-
-			string outputCode(HuffNode<T> node, T sign, string code)
-			{
-				if (node == null)
-				{
-					return string.Empty;
-				}
-				if (node.IsLeaf() && !node.IsNYT)
-				{
-					if (node.Value.CompareTo(sign) == 0)
-					{
-
-						string binary = "";
-						if (sign is byte)
-						{	//Console.WriteLine("Sign is a byte!");
-							string signAsString = sign.ToString();
-							byte signValue = Byte.Parse(signAsString);
-							binary = Convert.ToString(signValue, 2);
-							
-
-							if (binary.Length < 8)
-							{
-								binary = new string('0', 8 - binary.Length) + binary;
-							
-							}
-							//Console.WriteLine($"first sighting! Sign is {sign}, sign value is {signValue}");
-							if (signValue == 0)
-							{
-							//	Console.WriteLine("Value is gerwbguieobr!");
-								//Console.WriteLine("Value is : " + binary);
-							}
-
-
-						}
-
-						else if (sign is uint24)
-						{
-							string temp = sign.ToString();
-							uint24 num = uint24.TryParse(temp);
-							binary = uint24.ToBinaryString(num);
-						}
-
-						return code +binary;
-					}
-					return string.Empty;
-				}
-				string left = outputCode(node.LeftChild, sign, code + "0");
-				string right = outputCode(node.RightChild, sign, code + "1");
-				return left + right;
-			}
-		}
-
-
-		//private void FindNodeWithVal(HuffNode<T> node, T newSign)
-		//{
-		//	if (node != null)
-		//	{
-		//		if (node.Value.CompareTo(newSign) == 0)
-		//		{
-		//			IncrementNode(node);
-		//		}
-
-		//		else
-		//		{
-		//			FindNodeWithVal(node.LeftChild, newSign);
-		//			FindNodeWithVal(node.RightChild, newSign);
-		//		}
-		//	}
-		//}
 		private void IncrementNode(HuffNode<T> i_Node)
 		{
 			i_Node.Frequency++;
@@ -666,127 +298,5 @@ namespace DCICompressor
 			
 		}
 
-		public List<HuffNode<T>> getNodes()
-		{
-			List<HuffNode<T>> list = new List<HuffNode<T>>();
-			get(Root);
-			return list;
-
-			void get(HuffNode<T> node)
-			{
-				if (node != null && node.IsLeaf() && !node.IsNYT)
-				{
-					list.Add(node);
-
-				}
-
-				else if (node != null)
-				{
-
-					get(node.LeftChild);
-					get(node.RightChild);
-
-				}
-			}
-
-
-		}
 	}
-
-
 }
-
-
-//private void incrementParentChain(HuffNode<T> node)
-//{
-//	if (node != null && node.Parent != null)
-//	{
-//		node.Parent.Frequency++;
-//		incrementParentChain(node.Parent);
-//	}
-//}
-
-//public void FindAndIncrementNodeWithSign(T newSign)
-//{
-//	HuffNode<T> tempNode = Root;
-//	if (tempNode.Value.CompareTo(newSign) == 0)
-//	{
-//		tempNode.Frequency++;
-//	}
-//	else
-//	{
-//		FindNodeWithVal(Root.LeftChild, newSign);
-//		FindNodeWithVal(Root.RightChild, newSign);
-//	}
-//}
-
-
-//This was inside if (currentNode == null)
-//Console.WriteLine("Adding " + newSign + "as a new node");
-////HuffNode<T> prevNull = NullNode;
-
-
-//HuffNode<T> signNode = new HuffNode<T>(newSign); // new right child.
-//signNode.Identifier = s_Counter--;
-////signNode.Parent = prevNull;
-
-//HuffNode<T> newNYT = new HuffNode<T>(); // new left child;
-//newNYT.Identifier = s_Counter--;
-////newNYT.Parent = prevNull;
-
-//NullNode.LeftChild = newNYT;
-//NullNode.RightChild = signNode;
-
-//NullNode = newNYT;
-//currentNode = signNode;
-
-
-//This was inside if (currentNode == null)
-//prevNull.Frequency++;
-
-//code = outputCodeOf(newSign);
-
-
-//HuffNode<T> prevNull = NullNode;
-
-
-//HuffNode<T> signNode = new HuffNode<T>(newSign); // new right child.
-//signNode.Identifier = s_Counter--;
-//signNode.Parent = prevNull;
-
-//HuffNode<T> newNYT = new HuffNode<T>(); // new left child;
-//newNYT.Identifier = s_Counter--;
-//newNYT.Parent = prevNull;
-
-//prevNull.LeftChild = newNYT;
-//prevNull.RightChild = signNode;
-
-//NullNode = newNYT;
-//currentNode = signNode;
-////prevNull.Frequency++;
-
-////code = outputCodeOf(newSign);
-
-//This was inside the else block at the end
-//Console.WriteLine($"targer parent : {targetParent == null} \t currentParent: {currentParent == null}");
-//Console.WriteLine($"currentValue { char.Parse(currentNode.Frequency.ToString())}");
-
-//if (targetNode.IsLeftChild())
-//{
-//	targetParent.LeftChild = currentNode;
-//}
-
-//else if (targetNode.IsRightChild())
-//{
-//	targetParent.RightChild = currentNode;
-//}
-
-//if (currentNode.IsLeftChild())
-//{
-//	currentParent.LeftChild = targetNode;
-//}
-
-//else if (currentNode.IsRightChild())
-//{
-//	currentParent.RightChild = targetNode;
-//}

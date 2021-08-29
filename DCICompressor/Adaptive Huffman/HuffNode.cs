@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DCICompressor
+﻿namespace DCICompressor
 {
 	class HuffNode<T>
 	{
@@ -16,31 +10,17 @@ namespace DCICompressor
 		private int m_Frequency;
 		private bool m_IsNYT;
 
-
-
-
-		public HuffNode(T value, int frequency)
+		public HuffNode(T i_Value)
 		{
-			Value = value;
-			Frequency = frequency;
-		}
-		public HuffNode(T value)
-		{
-			//LeftChild = null;
-			//RightChild = null;
-			Value = value;
-			//Frequency = 0;
+			Value = i_Value;
 			Frequency = 1;
 		}
 
 		public HuffNode()
 		{
-			//LeftChild = null;
-			//RightChild = null;
 			Value = default(T);
 			Frequency = 0;
 		}
-
 
 		public HuffNode<T> LeftChild
 		{
@@ -48,8 +28,6 @@ namespace DCICompressor
 			set 
 			{ 
 				m_LeftChild = value;
-				//LeftChild.Parent = this;
-				//reCalcFrequency();
 			}
 		}
 
@@ -59,8 +37,6 @@ namespace DCICompressor
 			set
 			{
 				m_RightChild = value;
-				//RightChild.Parent = this;
-				//reCalcFrequency();
 			}
 		}
 
@@ -99,47 +75,6 @@ namespace DCICompressor
 			return (LeftChild == null && RightChild == null);
 		}
 
-		public void SwapChildren()
-		{
-			HuffNode<T> tempNode = LeftChild;
-			LeftChild = RightChild;
-			RightChild = tempNode;
-		}
-
-		public bool IsSibling(HuffNode<T> other)
-		{
-			if (other == null)
-				return false;
-			return (Parent.Equals(other.Parent));
-		}
-
-		internal void SwapChildrenKeepIDs()
-		{
-			Console.WriteLine("Swapping children.");
-
-			uint leftIdentifier = LeftChild.Identifier;
-			uint rightIdentifier = RightChild.Identifier;
-			//Console.WriteLine($"left id: {leftIdentifier}\t right id: {rightIdentifier}");
-			HuffNode<T> tempNode = LeftChild;
-			LeftChild = RightChild;
-			RightChild = tempNode;
-
-			LeftChild.Identifier = leftIdentifier;
-			RightChild.Identifier = rightIdentifier;
-			//Console.WriteLine($"left id: {leftIdentifier}\t right id: {rightIdentifier}");
-		}
-
-
-		public bool Equals(HuffNode<T> i_Other)
-		{
-			if (i_Other == null)
-			{
-				return false;
-			}
-
-			return this == i_Other;
-		}
-
 		internal bool IsLeftChild()
 		{
 			if (Parent == null)
@@ -174,26 +109,5 @@ namespace DCICompressor
 
 			return value;
 		}
-
-		//public int CompareTo(HuffNode<T> other)
-		//{
-		//	int result = 0;
-		//	if (other == null)
-		//	{
-		//		result = 1;
-		//	}
-
-		//	else if (other.Frequency == Frequency)
-		//	{
-		//		result = Math.Sign(Identifier - other.Identifier);
-		//	}
-
-		//	else
-		//	{
-
-		//	}
-
-		//	return result;
-		//}
 	}
 }
