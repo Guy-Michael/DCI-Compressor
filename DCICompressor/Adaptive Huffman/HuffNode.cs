@@ -22,16 +22,17 @@ namespace DCICompressor
 		}
 		public HuffNode(T value)
 		{
-			LeftChild = null;
-			RightChild = null;
+			//LeftChild = null;
+			//RightChild = null;
 			Value = value;
+			//Frequency = 0;
 			Frequency = 1;
 		}
 
 		public HuffNode()
 		{
-			LeftChild = null;
-			RightChild = null;
+			//LeftChild = null;
+			//RightChild = null;
 			Value = default(T);
 			Frequency = 0;
 		}
@@ -43,6 +44,7 @@ namespace DCICompressor
 			set 
 			{ 
 				m_LeftChild = value;
+				//LeftChild.Parent = this;
 				//reCalcFrequency();
 			}
 		}
@@ -53,6 +55,7 @@ namespace DCICompressor
 			set
 			{
 				m_RightChild = value;
+				//RightChild.Parent = this;
 				//reCalcFrequency();
 			}
 		}
@@ -115,15 +118,71 @@ namespace DCICompressor
 
 		internal void SwapChildrenKeepIDs()
 		{
+			Console.WriteLine("Swapping children.");
+
 			uint leftIdentifier = LeftChild.Identifier;
 			uint rightIdentifier = RightChild.Identifier;
-			
+			//Console.WriteLine($"left id: {leftIdentifier}\t right id: {rightIdentifier}");
 			HuffNode<T> tempNode = LeftChild;
 			LeftChild = RightChild;
 			RightChild = tempNode;
 
 			LeftChild.Identifier = leftIdentifier;
 			RightChild.Identifier = rightIdentifier;
+			//Console.WriteLine($"left id: {leftIdentifier}\t right id: {rightIdentifier}");
+		}
+
+		public HuffNode<T> Clone()
+		{
+			return new HuffNode<T>(Value, Frequency);
+		}
+
+		public bool Equals(HuffNode<T> i_Other)
+		{
+			if (i_Other == null)
+			{
+				return false;
+			}
+
+			return this == i_Other;
+			//return Identifier == i_Other.Identifier && Frequency == i_Other.Frequency;
+		}
+
+		internal bool IsLeftChild()
+		{
+			if (Parent == null)
+			{
+				return false;
+			}
+
+			return Parent.LeftChild == this;
+			//return Parent.LeftChild.Equals(this);
+		}
+
+		internal bool IsRightChild()
+		{
+			if (Parent == null)
+			{
+				return false;
+			}
+
+			return Parent.RightChild == this;
+			//return Parent.RightChild.Equals(this);
+		}
+
+		public override string ToString()
+		{
+			string value = string.Empty;
+			if (Value is byte)
+			{
+				value = value.ToString();
+				if (value.Length < 8)
+				{
+					value = new string('0', 8 - value.Length) + value;
+				}
+			}
+
+			return value;
 		}
 
 		//public int CompareTo(HuffNode<T> other)

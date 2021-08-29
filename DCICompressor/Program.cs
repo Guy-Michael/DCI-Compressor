@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -23,14 +24,60 @@ namespace DCICompressor
 			//byte[] bytes = { 1, 2, 3 };
 			//sender.Send(bytes);
 
+			//string path = ("C:\\Users\\Guy\\Desktop\\Compression\\ExampleInputs\\");
+			//BinaryWriter writer = new BinaryWriter(File.Create(path + "new testing file.tpa"));
+			//byte b = 0b0;
+
+			//for(int i = 0; i <20000; i++)
+			//{
+			//	writer.Write(b);
+			//}
+			//Console.WriteLine("DONE!");
 
 			string path = ("C:\\Users\\Guy\\Desktop\\Compression\\ExampleInputs\\");
-			string fileName = "entropy";
+			string fileName = "final test";
 			string inExtension = ".bmp";
 			string outExtension = ".dci";
-			string code = AdaptiveHuffmanEncoder.EncodeCorrect(path + fileName + inExtension, path +fileName+ outExtension);
-			byte[] result = AdaptiveHuffmanDecoder.DecodeBMPCorrect(path + fileName + outExtension, path + "new"+fileName +inExtension);
+			Console.WriteLine("Starting encoding..");
+			string code = AdaptiveHuffmanEncoder.Encode8BitCorrect(path + fileName + inExtension, path + fileName + outExtension);
 
+			//Console.WriteLine("Starting decoding..");
+			//byte[] result = AdaptiveHuffmanDecoder.Decode8BitBMPCorrectWithRegardsToHeader(path + fileName + outExtension, path + "New  " + fileName + inExtension);
+
+			//Console.WriteLine("Result is : " + result.Length + " long.");
+
+
+
+
+
+
+
+
+
+
+
+		}
+		public static HuffNode<int> findMax(HuffNode<int> node, int frequency)
+		{
+			if (node == null)
+			{
+				return null;
+			}
+
+			HuffNode<int> res = node;
+			
+			HuffNode<int> lres = findMax(node.LeftChild, frequency);
+			HuffNode<int> rres = findMax(node.RightChild, frequency);
+
+			if (lres.Identifier > res.Identifier)
+			{
+				res = lres;
+			}
+			if (rres.Identifier > res.Identifier)
+			{
+				res = rres;
+			}
+			return res;
 		}
 	}
 }
