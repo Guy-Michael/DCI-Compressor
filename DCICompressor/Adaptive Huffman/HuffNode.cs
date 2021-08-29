@@ -14,6 +14,10 @@ namespace DCICompressor
 		private uint m_Identifier;
 		private T m_Value;
 		private int m_Frequency;
+		private bool m_IsNYT;
+
+
+
 
 		public HuffNode(T value, int frequency)
 		{
@@ -84,19 +88,12 @@ namespace DCICompressor
 			set { m_Frequency = value; }
 		}
 
-		private void reCalcFrequency()
+		public bool IsNYT
 		{
-			Frequency = 0;
-			if (LeftChild != null)
-			{
-				Frequency += LeftChild.Frequency;
-			}
-
-			if (RightChild != null)
-			{
-				Frequency += RightChild.Frequency;
-			}
+			get { return m_IsNYT; }
+			set { m_IsNYT = value; }
 		}
+
 		public bool IsLeaf()
 		{
 			return (LeftChild == null && RightChild == null);
@@ -132,10 +129,6 @@ namespace DCICompressor
 			//Console.WriteLine($"left id: {leftIdentifier}\t right id: {rightIdentifier}");
 		}
 
-		public HuffNode<T> Clone()
-		{
-			return new HuffNode<T>(Value, Frequency);
-		}
 
 		public bool Equals(HuffNode<T> i_Other)
 		{
@@ -145,7 +138,6 @@ namespace DCICompressor
 			}
 
 			return this == i_Other;
-			//return Identifier == i_Other.Identifier && Frequency == i_Other.Frequency;
 		}
 
 		internal bool IsLeftChild()
@@ -156,7 +148,6 @@ namespace DCICompressor
 			}
 
 			return Parent.LeftChild == this;
-			//return Parent.LeftChild.Equals(this);
 		}
 
 		internal bool IsRightChild()
@@ -167,7 +158,6 @@ namespace DCICompressor
 			}
 
 			return Parent.RightChild == this;
-			//return Parent.RightChild.Equals(this);
 		}
 
 		public override string ToString()

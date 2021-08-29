@@ -86,11 +86,11 @@ namespace DCICompressor
 			string temp = code;
 			HuffmanTree<byte> tree = new HuffmanTree<byte>();
 			HuffNode<byte> node = tree.Root;
-
+			int k = 0;
 			while (temp.Length > 0)
 			{
 				node = tree.Root;
-					while (!node.IsLeaf())
+					while (!node.IsLeaf() && temp.Length > 0 )
 					{
 						//Console.WriteLine($"code length is: {temp.Length}");
 						if (temp[0].Equals('0'))
@@ -108,14 +108,14 @@ namespace DCICompressor
 				if (node.IsLeaf())
 				{
 					string tempCode = "";
-					if (temp.Length < 8)
-					{
-						tempCode = temp[0..];
-						temp = string.Empty;
-					}
+					//if (temp.Length < 8)
+					//{
+					//	tempCode = temp[0..];
+					//	temp = string.Empty;
+					//}
 
-
-					else if (node.Frequency == 0)
+					//Console.WriteLine(temp);
+					if (node.IsNYT)
 					{
 						tempCode = temp[1..9];
 						temp = temp[9..];
@@ -130,22 +130,25 @@ namespace DCICompressor
 					}
 
 					//Console.WriteLine(tempCode);
-					byte b = Convert.ToByte(tempCode,2);
-					//Console.WriteLine($"binary is {tempCode} with a value of {b}");
-					decode.Add(b);
+				//	Console.WriteLine(tempCode);
+					if (tempCode.Equals(string.Empty) == false)
+					{
+						byte b = Convert.ToByte(tempCode, 2);
+						decode.Add(b);
+						tree.AddNodeCorrect(b);
 
-					//uint24 b = uint24.TryParse(tempCode);
-					//Console.WriteLine("Adding " + b + "To tree ");
-					tree.AddNodeCorrect(b);
-					//Console.WriteLine("Code length is : " + temp.Length);
+					}
+					k++;
 
+					//if (k%100 == 0)
+					Console.WriteLine("Remaining: " + temp.Length);
 				}
 			}
 
 
 			//Console.WriteLine("bytes in decode: " + decode.Count);
 			writer.Write(decode.ToArray());
-			writer.Flush();
+			//writer.Flush();
 			writer.Close();
 			return decode.ToArray();
 		}
