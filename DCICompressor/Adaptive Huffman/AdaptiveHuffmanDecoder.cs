@@ -210,7 +210,6 @@ namespace DCICompressor
 				}
 			}
 
-
 			Console.WriteLine("bytes in decode: " + decode.Count);
 			writer.Write(decode.ToArray());
 			writer.Flush();
