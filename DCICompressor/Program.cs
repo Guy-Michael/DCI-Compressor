@@ -24,6 +24,8 @@ namespace DCICompressor
 			byte[] result = AdaptiveHuffmanDecoder.Decode8BitBMPCorrectWithRegardsToHeader(path + fileName + outExtension, path + "New  " + fileName + inExtension);
 
 			Console.WriteLine("Result is : " + result.Length + " long.");
+			
+			
 			//Socket communication.
 			//IPHostEntry host = Dns.GetHostEntry("localhost");
 			//IPAddress ipAddress = host.AddressList[0];

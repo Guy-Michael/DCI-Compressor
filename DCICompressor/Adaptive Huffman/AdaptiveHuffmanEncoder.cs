@@ -46,37 +46,14 @@ namespace DCICompressor
 			string code = "";
 			HuffmanTree<byte> tree = new HuffmanTree<byte>();
 
-			int k = 0;
-
 			for(int i = 0; i <file.PixelData.Length; i++)
 			{
 				byte newSign = file.PixelData[i];
-
 				code += tree.AddNodeCorrect(newSign);
-
-				if (i % 60 == 0)
-				{
-					Console.WriteLine($"Remaining: {file.PixelData.Length - i}");
-				}
 			}
 
-
-			//foreach (byte b in file.PixelData)
-			//{
-			//	byte newSign = b;
-
-			//	code += tree.AddNodeCorrect(newSign);
-
-			//	k++;
-			//	if (k % 60 == 0)
-			//	{
-			//		Console.WriteLine();
-			//	}
-			//}
-
-
-			int codeLengthInBytes = (code.Length / 8) ;
-			byte[] codeArray = new byte[codeLengthInBytes + 1 + 54];
+			int codeLengthInBytes = (code.Length / 8) + 1;
+			byte[] codeArray = new byte[codeLengthInBytes + 54];
 
 			for (int i = 0; i < file.HeaderData.Length; i++)
 			{
@@ -99,14 +76,9 @@ namespace DCICompressor
 				codeArray[codeArray.Length - 1] = Convert.ToByte(code, 2);
 
 			}
-			//foreach (byte b in codeArray)
-			//{
-			//	Console.WriteLine("Value is : " + b);
-			//}
-			writer.Write(codeArray);
 
+			writer.Write(codeArray);
 			writer.Close();
-			//Console.WriteLine(code);
 			return code;
 		}
 
