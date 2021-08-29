@@ -2,20 +2,22 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace DCICompressor.Adaptive_Huffman
+namespace DCICompressor
 {
 	class BMPFile
 	{
 		private string m_Path;
 		private byte[] m_HeaderData;
 		private byte[] m_PixelData;
-		private uint m_Width;
-		private uint m_Height;
-		private uint m_BytesPerColor;
+		private int m_Width;
+		private int m_Height;
+		private int m_BytesPerColor;
+		private int m_PaddingCountPerRow;
 
 		public string Path
 		{
 			get { return m_Path; }
+			private set { m_Path = value; }
 		}
 
 		public byte[] HeaderData
@@ -29,40 +31,48 @@ namespace DCICompressor.Adaptive_Huffman
 			private set { m_PixelData = value; }
 		}
 
-		public uint Width
+		public int Width
 		{
 			get { return m_Width; }
 			private set { m_Width = value; }
 		}
 
-		public uint Height
+		public int Height
 		{
 			get { return m_Height; }
 			private set { m_Height = value; }
 		}
 
-		public uint  BytesPerColor
+		public int BytesPerColor
 		{
 			get { return m_BytesPerColor; }
 			private set { m_BytesPerColor = value; }
 		}
 
+		public int PaddingCountPerRow
+		{
+			get { return m_PaddingCountPerRow; }
+			private set { m_PaddingCountPerRow = value; }
+		}
+
 
 		public BMPFile(string path)
 		{
+			Path = path;
 			byte[] bytes;
 			if (IsThisABMPFile(path))
 			{
 				bytes = File.ReadAllBytes(path);
 				uint pixelDataOffset = BitConverter.ToUInt32(bytes, 0xa);
 
-				Index pixelOffset = (int)(pixelDataOffset-1);
+				Index pixelOffset = (int)(pixelDataOffset);
 				HeaderData = bytes[0..pixelOffset];
 				PixelData = bytes[pixelOffset..];
 
-				Width = BitConverter.ToUInt32(bytes, 0x12);
-				Height = BitConverter.ToUInt32(bytes, 0x16);
+				Width = BitConverter.ToInt32(bytes, 0x12);
+				Height = BitConverter.ToInt32(bytes, 0x16);
 				BytesPerColor = BitConverter.ToUInt16(bytes, 0x1c);
+				PaddingCountPerRow = (Width * 3) % 4;
 			}
 
 			else
@@ -71,11 +81,41 @@ namespace DCICompressor.Adaptive_Huffman
 			}
 			
 		}
+		public BMPFile(byte[] data)
+		{
+
+			if (IsThisABMPFile(data))
+			{
+				uint pixelDataOffset = BitConverter.ToUInt32(data, 0xa);
+
+				Index pixelOffset = (int)(pixelDataOffset);
+				HeaderData = data[0..pixelOffset];
+				PixelData = data[pixelOffset..];
+
+				Width = BitConverter.ToInt32(data, 0x12);
+				Height = BitConverter.ToInt32(data, 0x16);
+				BytesPerColor = BitConverter.ToUInt16(data, 0x1c);
+			}
+
+			else
+			{
+				Console.WriteLine("Not a BMP FILE!");
+			}
+		}
 
 		private bool IsThisABMPFile(string path)
 		{
-			byte[] authenticationBytes = new byte[2];
-			Array.Copy(File.ReadAllBytes(path), authenticationBytes, 2);
+			byte[] authenticationBytes = File.ReadAllBytes(path)[0..2];
+			char firstChar = (char)authenticationBytes[0];
+			char secondChar = (char)authenticationBytes[1];
+
+			return (firstChar == 'B' && secondChar == 'M');
+
+		}
+
+		private bool IsThisABMPFile(byte[] data)
+		{
+			byte[] authenticationBytes = data[0..2];
 			char firstChar = (char)authenticationBytes[0];
 			char secondChar = (char)authenticationBytes[1];
 

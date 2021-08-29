@@ -59,20 +59,81 @@ namespace DCICompressor
 		}
 
 		public int CompareTo(uint24 other)
-		{
+		{	
 			return Math.Sign(uintValue - other.uintValue);
 		}
 
 		public override string ToString()
 		{
-			Console.WriteLine("Been here");
-			//return "hello";
-			return (Convert.ToString(b0, 2) + Convert.ToString(b1, 2) + Convert.ToString(b2, 2));
+			string val0 = Convert.ToString(b0, 2);
+			string val1 = Convert.ToString(b1, 2);
+			string val2 = Convert.ToString(b2, 2);
+
+			string[] arr = { val0, val1, val2 };
+
+			//Padding each string to length 8.
+			string totalValue = string.Empty;
+			foreach (string s in arr)
+			{
+				int padding = 8 - s.Length;
+				string paddedVal = new string('0', padding) + s;
+				//Console.WriteLine(paddedVal);
+				totalValue += paddedVal;
+			}
+
+			return totalValue;
+			//return (Convert.ToString(b0, 2) + Convert.ToString(b1, 2) + Convert.ToString(b2, 2));
 		}
 
 		public static string ToBinaryString(uint24 num)
 		{
-			return Convert.ToString(num.uintValue, 2);
+			string val0 = Convert.ToString(num.b0, 2);
+			string val1 = Convert.ToString(num.b1, 2);
+			string val2 = Convert.ToString(num.b2, 2);
+
+			string[] arr = { val0, val1, val2 };
+
+			//Padding each string to length 8.
+			string totalValue = string.Empty;
+			foreach (string s in arr)
+			{
+				//Console.WriteLine(s);
+				int padding = 8 - s.Length;
+				totalValue += new string('0', padding) + s;
+			}
+
+			return totalValue;
+			//string value = Convert.ToString(num.uintValue, 2);
+			//Console.WriteLine("value length in string : " + value.Length);
+			//int padding = 24 - value.Length;
+			//return new string('0', padding) + value;
+
+			////return Convert.ToString(num.uintValue, 2);
 		}
+
+		public static uint24 TryParse(string num)
+		{
+			foreach(char c in num)
+			{
+				if (!char.IsDigit(c))
+				{
+					throw new ArgumentException("not a number!");
+				}
+			}
+
+			//if (num.Length < 24)
+			//{
+			//	int padding = 24 - (num.Length);
+			//	num = new string('0', padding) + num;
+				
+			//}
+			uint value =(uint)  Convert.ToUInt32(num,2);
+			return new uint24(value);
+		}
+
+		//public static uint24 Parse(string num)
+		//{
+
+		//}
 	}
 }

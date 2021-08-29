@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DCICompressor.Adaptive_Huffman
+﻿namespace DCICompressor
 {
 	class HuffNode<T>
 	{
@@ -14,28 +8,19 @@ namespace DCICompressor.Adaptive_Huffman
 		private uint m_Identifier;
 		private T m_Value;
 		private int m_Frequency;
+		private bool m_IsNYT;
 
-		public HuffNode(T value, int frequency)
+		public HuffNode(T i_Value)
 		{
-			Value = value;
-			Frequency = frequency;
-		}
-		public HuffNode(T value)
-		{
-			LeftChild = null;
-			RightChild = null;
-			Value = value;
+			Value = i_Value;
 			Frequency = 1;
 		}
 
 		public HuffNode()
 		{
-			LeftChild = null;
-			RightChild = null;
 			Value = default(T);
 			Frequency = 0;
 		}
-
 
 		public HuffNode<T> LeftChild
 		{
@@ -43,7 +28,6 @@ namespace DCICompressor.Adaptive_Huffman
 			set 
 			{ 
 				m_LeftChild = value;
-				//reCalcFrequency();
 			}
 		}
 
@@ -53,7 +37,6 @@ namespace DCICompressor.Adaptive_Huffman
 			set
 			{
 				m_RightChild = value;
-				//reCalcFrequency();
 			}
 		}
 
@@ -81,70 +64,50 @@ namespace DCICompressor.Adaptive_Huffman
 			set { m_Frequency = value; }
 		}
 
-		private void reCalcFrequency()
+		public bool IsNYT
 		{
-			Frequency = 0;
-			if (LeftChild != null)
-			{
-				Frequency += LeftChild.Frequency;
-			}
-
-			if (RightChild != null)
-			{
-				Frequency += RightChild.Frequency;
-			}
+			get { return m_IsNYT; }
+			set { m_IsNYT = value; }
 		}
+
 		public bool IsLeaf()
 		{
 			return (LeftChild == null && RightChild == null);
 		}
 
-		public void SwapChildren()
+		internal bool IsLeftChild()
 		{
-			HuffNode<T> tempNode = LeftChild;
-			LeftChild = RightChild;
-			RightChild = tempNode;
-		}
-
-		public bool IsSibling(HuffNode<T> other)
-		{
-			if (other == null)
+			if (Parent == null)
+			{
 				return false;
-			return (Parent.Equals(other.Parent));
+			}
+
+			return Parent.LeftChild == this;
 		}
 
-		internal void SwapChildrenKeepIDs()
+		internal bool IsRightChild()
 		{
-			uint leftIdentifier = LeftChild.Identifier;
-			uint rightIdentifier = RightChild.Identifier;
-			
-			HuffNode<T> tempNode = LeftChild;
-			LeftChild = RightChild;
-			RightChild = tempNode;
+			if (Parent == null)
+			{
+				return false;
+			}
 
-			LeftChild.Identifier = leftIdentifier;
-			RightChild.Identifier = rightIdentifier;
+			return Parent.RightChild == this;
 		}
 
-		//public int CompareTo(HuffNode<T> other)
-		//{
-		//	int result = 0;
-		//	if (other == null)
-		//	{
-		//		result = 1;
-		//	}
+		public override string ToString()
+		{
+			string value = string.Empty;
+			if (Value is byte)
+			{
+				value = value.ToString();
+				if (value.Length < 8)
+				{
+					value = new string('0', 8 - value.Length) + value;
+				}
+			}
 
-		//	else if (other.Frequency == Frequency)
-		//	{
-		//		result = Math.Sign(Identifier - other.Identifier);
-		//	}
-
-		//	else
-		//	{
-
-		//	}
-
-		//	return result;
-		//}
+			return value;
+		}
 	}
 }
