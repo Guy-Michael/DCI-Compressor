@@ -1,0 +1,7 @@
+This project will not run on its own, as its activation
+relies on a client socket connecting to it and transmitting
+information. The copy in this folder is here for examination
+purposes only.
+
+The copy of it that is actually used on runtime is in:
+Runner -> bin -> Debug -> net5.0-windows.

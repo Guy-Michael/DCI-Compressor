@@ -47,7 +47,7 @@ namespace Runner
 			// 
 			// button2
 			// 
-			this.button2.Location = new System.Drawing.Point(275, 260);
+			this.button2.Location = new System.Drawing.Point(257, 261);
 			this.button2.Name = "button2";
 			this.button2.Size = new System.Drawing.Size(281, 61);
 			this.button2.TabIndex = 1;
@@ -73,7 +73,7 @@ namespace Runner
 			this.button3.UseVisualStyleBackColor = true;
 			this.button3.Click += new System.EventHandler(this.decompress_click);
 			// 
-			// Form1
+			// CompressorGUI
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 30F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -82,8 +82,8 @@ namespace Runner
 			this.Controls.Add(this.progressBar1);
 			this.Controls.Add(this.button2);
 			this.Controls.Add(this.button1);
-			this.Name = "Form1";
-			this.Text = "Form1";
+			this.Name = "CompressorGUI";
+			this.Text = "DCI Compressor (Displayable Compressed Image)";
 			this.ResumeLayout(false);
 
 		}

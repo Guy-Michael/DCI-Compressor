@@ -13,7 +13,6 @@ namespace Runner
 	{
 		private string m_InputPath;
 		private string m_OutputPath;
-		private string m_PathWithoutExtension;
 
 		public CompressorGUI()
 		{
@@ -49,20 +48,26 @@ namespace Runner
 
 		private void DecodeAndDisplayTask(string path)
 		{		
-			IEnumerator<List<byte>> decoderEnumerator = AdaptiveHuffmanDecoder.Decode8BitBMPOverNetwork(path);
+			IEnumerator<List<byte>> decoderEnumerator = AdaptiveHuffmanDecoder.DecodeBMPOverNetwork(path);
 			NetworkCommunication.OpenClientSocket();
 			int prevProgress = 0, progress = 0;
 			while (decoderEnumerator.MoveNext())
 			{
-				progress = decoderEnumerator.Current.Last();
+
 				List<byte> b = decoderEnumerator.Current;
-				b.RemoveAt(b.Count - 1);
-				if (progress > prevProgress)
+				if (b.Count == 1)
 				{
-					progressBar1.PerformStep();
+					progress = b[0];
+					if (progress > prevProgress)
+					{
+						progressBar1.PerformStep();
+					}
+					prevProgress = progress;
 				}
-				prevProgress = progress;
-				NetworkCommunication.SendDataOverNetwork(b.ToArray(), 0, b.Count);
+				else
+				{
+					NetworkCommunication.SendDataOverNetwork(b.ToArray(), 0, b.Count);
+				}
 			}
 		
 			NetworkCommunication.CloseClientSocket();
@@ -93,7 +98,6 @@ namespace Runner
 
 			return string.Empty;
 		}
-
 
 		private void EncodeTask(string i_InputPath, string i_OutputPath)
 		{
@@ -126,7 +130,7 @@ namespace Runner
 
 		private void decompressTask(string i_InputPath, string i_OutputPath)
 		{
-			IEnumerator<int> decomEnumerator = AdaptiveHuffmanDecoder.DecodeAndStore(i_InputPath, i_OutputPath);
+			IEnumerator<int> decomEnumerator = AdaptiveHuffmanDecoder.DecodeBMPAndStoreOnDisk(i_InputPath, i_OutputPath);
 			int progress = 0, prevProgress = 0;
 			while(decomEnumerator.MoveNext())
 			{

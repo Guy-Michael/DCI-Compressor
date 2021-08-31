@@ -30,31 +30,26 @@ namespace DCICompressor
 			get { return m_PixelData; }
 			private set { m_PixelData = value; }
 		}
-
 		public int Width
 		{
 			get { return m_Width; }
 			private set { m_Width = value; }
 		}
-
 		public int Height
 		{
 			get { return m_Height; }
 			private set { m_Height = value; }
 		}
-
 		public int BytesPerColor
 		{
 			get { return m_BytesPerColor; }
 			private set { m_BytesPerColor = value; }
 		}
-
 		public int PaddingCountPerRow
 		{
 			get { return m_PaddingCountPerRow; }
 			private set { m_PaddingCountPerRow = value; }
 		}
-
 
 		public BMPFile(string path)
 		{
@@ -81,6 +76,7 @@ namespace DCICompressor
 			}
 			
 		}
+	
 		public BMPFile(byte[] data)
 		{
 

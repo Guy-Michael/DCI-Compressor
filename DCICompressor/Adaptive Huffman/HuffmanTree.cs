@@ -6,7 +6,7 @@ namespace DCICompressor
 	class HuffmanTree<T> where T : IComparable<T>
 	{
 		//This is the maximum number unique symbols.
-		private uint s_Counter =  (uint)((Math.Pow(2, 24) * 2) + 1);
+		private uint s_Counter =  (uint)((Math.Pow(2, 8) * 2) + 1);
 		private HuffNode<T> m_Root;
 	
 		public HuffNode<T> Root
@@ -199,34 +199,16 @@ namespace DCICompressor
 
 						string binary = "";
 						if (i_Sign is byte)
-						{   //Console.WriteLine("Sign is a byte!");
+						{ 
 							string signAsString = i_Sign.ToString();
 							byte signValue = Byte.Parse(signAsString);
 							binary = Convert.ToString(signValue, 2);
 
-
 							if (binary.Length < 8)
 							{
 								binary = new string('0', 8 - binary.Length) + binary;
-
 							}
-							//Console.WriteLine($"first sighting! Sign is {sign}, sign value is {signValue}");
-							if (signValue == 0)
-							{
-								//	Console.WriteLine("Value is gerwbguieobr!");
-								//Console.WriteLine("Value is : " + binary);
-							}
-
-
 						}
-
-						else if (i_Sign is uint24)
-						{
-							string temp = i_Sign.ToString();
-							uint24 num = uint24.TryParse(temp);
-							binary = uint24.ToBinaryString(num);
-						}
-
 						if (i_IsFirstApperace)
 						{
 							return i_Code + binary;
@@ -239,6 +221,7 @@ namespace DCICompressor
 					}
 					return string.Empty;
 				}
+
 				string left = outputCode(i_Node.LeftChild, i_Sign, i_Code + "0", i_IsFirstApperace);
 				string right = outputCode(i_Node.RightChild, i_Sign, i_Code + "1", i_IsFirstApperace);
 				return left + right;
