@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 
 namespace DCICompressor
 {
-	class AdaptiveHuffmanDecoder
+	public class AdaptiveHuffmanDecoder
 	{
-		public static byte[] Decode8BitBMPCorrectWithRegardsToHeader(string input, string output)
+		public static IEnumerator<List<byte>> Decode8BitBMPOverNetwork(string input)
 		{
-			BinaryWriter writer = new BinaryWriter(File.Open(output, FileMode.Create));
-
 			byte[] arr = File.ReadAllBytes(input);
 			BMPFile file = new BMPFile(arr);
 			string code = string.Empty;
+
+
+			yield return file.HeaderData.ToList();
 
 			foreach (byte b in file.PixelData)
 			{
@@ -25,7 +26,7 @@ namespace DCICompressor
 			}
 
 			List<byte> decode = new List<byte>();
-			decode.AddRange(file.HeaderData);
+
 			string temp = code;
 			HuffmanTree<byte> tree = new HuffmanTree<byte>();
 			HuffNode<byte> node = tree.Root;
@@ -33,19 +34,91 @@ namespace DCICompressor
 			while (temp.Length > 0)
 			{
 				node = tree.Root;
-					while (!node.IsLeaf() && temp.Length > 0 )
+				while (!node.IsLeaf() && temp.Length > 0)
+				{
+					if (temp[0].Equals('0'))
 					{
-						if (temp[0].Equals('0'))
-						{
-							node = node.LeftChild;
-						}
-
-						else if (temp[0].Equals('1'))
-						{
-							node = node.RightChild;
-						}
-						temp = temp[1..];
+						node = node.LeftChild;
 					}
+
+					else if (temp[0].Equals('1'))
+					{
+						node = node.RightChild;
+					}
+					temp = temp[1..];
+				}
+
+				if (node.IsLeaf())
+				{
+					string tempCode = "";
+					if (node.IsNYT)
+					{
+						tempCode = temp[1..9];
+						temp = temp[9..];
+					}
+
+					else
+					{
+						tempCode = Convert.ToString(node.Value, 2);
+					}
+
+					if (tempCode.Equals(string.Empty) == false)
+					{
+						byte b = Convert.ToByte(tempCode, 2);
+						decode.Add(b);
+						tree.AddNodeCorrect(b);
+
+						if (decode.Count == 3)
+						{
+							decode.Add((byte)(((float)(code.Length-1 - temp.Length )/ code.Length - 1) * 100));
+							yield return decode;
+							decode.Clear();
+						}
+					}
+				}
+			}
+			yield return decode;
+		}
+
+		public static IEnumerator<int> DecodeAndStore(string input, string output)
+		{
+			BinaryWriter writer = new BinaryWriter(File.Open(output, FileMode.Create));
+
+			byte[] arr = File.ReadAllBytes(input);
+			BMPFile file = new BMPFile(arr);
+			string code = string.Empty;
+
+			writer.Write(file.HeaderData);
+
+			foreach (byte b in file.PixelData)
+			{
+				string tempCode = Convert.ToString(b, 2);
+				int padding = 8 - tempCode.Length;
+				tempCode = new string('0', padding) + tempCode;
+				code += tempCode;
+			}
+
+			List<byte> decode = new List<byte>();
+			string temp = code;
+			HuffmanTree<byte> tree = new HuffmanTree<byte>();
+			HuffNode<byte> node = tree.Root;
+
+			while (temp.Length > 0)
+			{
+				node = tree.Root;
+				while (!node.IsLeaf() && temp.Length > 0)
+				{
+					if (temp[0].Equals('0'))
+					{
+						node = node.LeftChild;
+					}
+
+					else if (temp[0].Equals('1'))
+					{
+						node = node.RightChild;
+					}
+					temp = temp[1..];
+				}
 
 				if (node.IsLeaf())
 				{
@@ -59,25 +132,92 @@ namespace DCICompressor
 					else
 					{
 
-						tempCode = Convert.ToString(node.Value,2);
+						tempCode = Convert.ToString(node.Value, 2);
 					}
 
 					if (tempCode.Equals(string.Empty) == false)
 					{
 						byte b = Convert.ToByte(tempCode, 2);
-						decode.Add(b);
+						writer.Write(b);
+						yield return (int) (((float)((code.Length-1) - temp.Length) / code.Length - 1) * 100);
 						tree.AddNodeCorrect(b);
-
 					}
-
-					Console.WriteLine("Remaining: " + temp.Length);
 				}
 			}
 
-			writer.Write(decode.ToArray());
 			writer.Close();
-			return decode.ToArray();
 		}
+
+
+
+		//public static byte[] Decode8BitBMPCorrectWithRegardsToHeader(string input, string output)
+		//{
+		//	BinaryWriter writer = new BinaryWriter(File.Open(output, FileMode.Create));
+
+		//	byte[] arr = File.ReadAllBytes(input);
+		//	BMPFile file = new BMPFile(arr);
+		//	string code = string.Empty;
+
+		//	foreach (byte b in file.PixelData)
+		//	{
+		//		string tempCode = Convert.ToString(b, 2);
+		//		int padding = 8 - tempCode.Length;
+		//		tempCode = new string('0', padding) + tempCode;
+		//		code += tempCode;
+		//	}
+
+		//	List<byte> decode = new List<byte>();
+		//	decode.AddRange(file.HeaderData);
+		//	string temp = code;
+		//	HuffmanTree<byte> tree = new HuffmanTree<byte>();
+		//	HuffNode<byte> node = tree.Root;
+
+		//	while (temp.Length > 0)
+		//	{
+		//		node = tree.Root;
+		//		while (!node.IsLeaf() && temp.Length > 0)
+		//		{
+		//			if (temp[0].Equals('0'))
+		//			{
+		//				node = node.LeftChild;
+		//			}
+
+		//			else if (temp[0].Equals('1'))
+		//			{
+		//				node = node.RightChild;
+		//			}
+		//			temp = temp[1..];
+		//		}
+
+		//		if (node.IsLeaf())
+		//		{
+		//			string tempCode = "";
+		//			if (node.IsNYT)
+		//			{
+		//				tempCode = temp[1..9];
+		//				temp = temp[9..];
+		//			}
+
+		//			else
+		//			{
+
+		//				tempCode = Convert.ToString(node.Value, 2);
+		//			}
+
+		//			if (tempCode.Equals(string.Empty) == false)
+		//			{
+		//				byte b = Convert.ToByte(tempCode, 2);
+		//				decode.Add(b);
+		//				tree.AddNodeCorrect(b);
+
+		//			}
+		//		}
+		//	}
+
+		//	writer.Write(decode.ToArray());
+		//	writer.Close();
+		//	return decode.ToArray();
+		//}
 
 
 

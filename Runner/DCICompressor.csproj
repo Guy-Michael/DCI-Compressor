@@ -6,4 +6,9 @@
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DCICompressor\AdaptiveHuffmanFGK.csproj" />
+    <ProjectReference Include="..\Networking\Networking.csproj" />
+  </ItemGroup>
+
 </Project>

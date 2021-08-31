@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "AdaptiveHuffmanFGK": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false,
+      "remoteDebugMachine": ""
+    }
+  }
+}

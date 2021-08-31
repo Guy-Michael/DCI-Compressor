@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdaptiveHuffmanFGK", "DCICompressor\AdaptiveHuffmanFGK.csproj", "{3B3614CE-D9CE-4C66-A4A7-220F75C7C029}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runner", "Runner\Runner.csproj", "{F29A3C2E-8390-449D-9D04-1520923ADABF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DCICompressor", "Runner\DCICompressor.csproj", "{F29A3C2E-8390-449D-9D04-1520923ADABF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networking", "Networking\Networking.csproj", "{6FBE2949-139F-4579-BBD7-B0FEF2F133E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{F29A3C2E-8390-449D-9D04-1520923ADABF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F29A3C2E-8390-449D-9D04-1520923ADABF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F29A3C2E-8390-449D-9D04-1520923ADABF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FBE2949-139F-4579-BBD7-B0FEF2F133E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FBE2949-139F-4579-BBD7-B0FEF2F133E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FBE2949-139F-4579-BBD7-B0FEF2F133E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FBE2949-139F-4579-BBD7-B0FEF2F133E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
